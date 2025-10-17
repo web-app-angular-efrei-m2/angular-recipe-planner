@@ -1,0 +1,53 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "files": {
+    "includes": ["src/**/*.ts", "src/**/*.html", "src/**/*.json"]
+  },
+  "formatter": {
+    "indentStyle": "space",
+    "lineWidth": 160
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "a11y": {
+        "noSvgWithoutTitle": "off"
+      },
+      "style": {
+        "noShoutyConstants": "warn",
+        "useBlockStatements": "info",
+        "useCollapsedElseIf": "warn",
+        "useForOf": "warn",
+        "useFragmentSyntax": "warn",
+        "useShorthandAssign": "info",
+        "useThrowNewError": "warn",
+        "useThrowOnlyError": "warn"
+      },
+      "nursery": {
+        "useSortedClasses": "warn"
+      },
+      "suspicious": {
+        "noConsole": {
+          "level": "error",
+          "options": {
+            "allow": ["error", "warn", "log"]
+          }
+        },
+        "noEvolvingTypes": "error",
+        "useErrorMessage": "error",
+        "useNumberToFixedDigitsArgument": "warn",
+        "noEmptyBlock": "error",
+        "noConfusingVoidType": "off"
+      },
+      "correctness": {
+        "noUnknownFunction": "off",
+        "noUnusedImports": "warn",
+        "noUnusedVariables": "warn"
+      },
+      "complexity": {
+        "noBannedTypes": "off"
+      }
+    }
+  }
+}
