@@ -1,6 +1,7 @@
-import { Component, signal } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { FormsModule, type NgForm } from "@angular/forms";
-import { RouterLink } from "@angular/router";
+import { Router, RouterLink } from "@angular/router";
+import { AuthService } from "@/app/core/services/auth";
 import { FieldComponent } from "@/shared/components/ui/form/field/field.component";
 import { cn } from "@/utils/classes";
 
@@ -125,6 +126,8 @@ type FieldConfig = {
 })
 export class RegisterComponent {
   protected readonly cn = cn;
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   // Form fields configuration
   formFields: FieldConfig[] = [
@@ -188,8 +191,24 @@ export class RegisterComponent {
         password,
         agreeToTerms,
       });
-      // Handle form submission (e.g., call API)
-      // form.reset(); // Optionally reset form after successful submission
+
+      // Call login to update the BehaviorSubject
+      this.authService.login(email, password);
+
+      // Option 1: Subscribe to the BehaviorSubject's Observable
+      // This will automatically get notified when auth state changes
+      this.authService.isAuthenticated$.subscribe({
+        next: (isAuthenticated) => {
+          if (isAuthenticated) {
+            console.log("✅ User authenticated successfully");
+            // Redirect to recipes page after successful registration
+            this.router.navigate(["/recipes"]);
+          }
+        },
+        error: (err) => {
+          console.error("❌ Registration failed:", err);
+        },
+      });
     }
   }
 }
