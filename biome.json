@@ -46,7 +46,8 @@
         "noUnusedVariables": "warn"
       },
       "complexity": {
-        "noBannedTypes": "off"
+        "noBannedTypes": "off",
+        "useLiteralKeys": "off"
       }
     }
   }
