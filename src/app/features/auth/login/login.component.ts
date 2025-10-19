@@ -1,21 +1,15 @@
-import { Component, signal } from "@angular/core";
-import { FormsModule, type NgForm } from "@angular/forms";
-import { RouterLink } from "@angular/router";
+import { CommonModule } from "@angular/common";
+import { Component, inject } from "@angular/core";
+import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
+import { Router, RouterLink } from "@angular/router";
+import { AuthService } from "@/app/core/services/auth";
+import { emailValidator, passwordValidator } from "@/app/shared/validators/auth";
 import { FieldComponent } from "@/shared/components/ui/form/field/field.component";
 import { cn } from "@/utils/classes";
 
-type FieldConfig = {
-  name: string;
-  type: string;
-  placeholder: string;
-  required: boolean;
-  errorKey: keyof LoginComponent["errors"];
-  minlength?: number;
-};
-
 @Component({
   selector: "app-login",
-  imports: [RouterLink, FormsModule, FieldComponent],
+  imports: [RouterLink, ReactiveFormsModule, CommonModule, FieldComponent],
   template: `
     <div class="min-h-screen flex flex-1 flex-col break-words rounded-sm p-0 text-start font-semibold">
       <!-- Hero Image Section -->
@@ -39,13 +33,13 @@ type FieldConfig = {
       <!-- Form Section -->
       <div class="flex flex-1 flex-col p-6 gap-2">
         <!-- Register Form using Field Component -->
-        <form (ngSubmit)="onSubmit(registerForm)" #registerForm="ngForm" class="flex flex-col gap-4">
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
           <!-- Dynamic Form Fields -->
           @for (field of formFields; track field.name) {
             <app-field
-              [required]="field.required"
-              [invalid]="errors[field.errorKey]() !== null"
-              [errorText]="errors[field.errorKey]() || ''"
+              [required]="loginForm.get(field.name)?.hasValidator(Validators.required)"
+              [invalid]="loginForm.get(field.name)?.invalid && submitted"
+              [errorText]="getErrorMessage(field.name)"
             >
             <div class="relative isolate inline-flex justify-start gap-2 items-center">
               <div class="pointer-events-none absolute z-[2] flex h-full items-center justify-center pl-3 text-gray-400">
@@ -58,13 +52,11 @@ type FieldConfig = {
                 </div>
                 <input
                   [type]="field.type"
-                  [name]="field.name"
-                  ngModel
-                  [minlength]="field.minlength ?? null"
+                  [formControlName]="field.name"
                   [class]="
                     cn(
                       'input input-lg input-subtle pl-12 rounded-lg placeholder:text-gray-400',
-                      !errors[field.errorKey]() && 'focus-visible:outline-purple-500'
+                      loginForm.get(field.name)?.invalid && 'focus-visible:outline-purple-500'
                     )
                   "
                   [placeholder]="field.placeholder"
@@ -103,64 +95,110 @@ type FieldConfig = {
   `,
 })
 export class LoginComponent {
+  private authService = inject(AuthService);
+  private router = inject(Router);
   protected readonly cn = cn;
+  protected readonly Validators = Validators;
+  private fb = inject(FormBuilder);
+
+  // Track if form has been submitted
+  protected submitted = false;
 
   // Form fields configuration
-  formFields: FieldConfig[] = [
+  protected formFields = [
     {
       name: "email",
       type: "email",
       placeholder: "Email address",
-      required: true,
-      errorKey: "emailError",
     },
     {
       name: "password",
       type: "password",
       placeholder: "Password",
-      required: true,
-      errorKey: "passwordError",
-      minlength: 8,
     },
-  ];
+  ] as const;
 
-  // Error signals - only set on submit
-  errors = {
-    emailError: signal<string | null>(null),
-    passwordError: signal<string | null>(null),
-  };
+  // Reactive Form Group
+  loginForm = this.fb.group(
+    {
+      email: [
+        "",
+        [
+          Validators.required,
+          emailValidator(), // Custom email validator
+        ],
+      ],
+      password: [
+        "",
+        [
+          Validators.required,
+          Validators.minLength(8), // Minimum 8 characters
+          passwordValidator(), // Custom validator
+        ],
+      ],
+    },
+    {
+      updateOn: "submit", // Only validate when form is submitted, not on every input change
+    },
+  );
 
-  onSubmit(form: NgForm): void {
-    // Get form values from Angular's NgForm
-    const { name, email, password } = form.value;
+  getErrorMessage(name: string): string | undefined {
+    const control = this.loginForm.get(name);
+    if (control?.hasError("required")) {
+      return `${name} is required`;
+    }
+    if (control?.hasError("invalidEmail")) {
+      const error = control.getError("invalidEmail");
+      return error.message || "Please enter a valid email address";
+    }
+    if (control?.hasError("minlength")) {
+      const requiredLength = control.getError("minlength").requiredLength;
+      return `Password must be at least ${requiredLength} characters`;
+    }
+    if (control?.hasError("invalidPassword")) {
+      const error = control.getError("invalidPassword");
+      return error.message || "Password must contain at least one uppercase letter and one digit";
+    }
+    return undefined;
+  }
 
-    // Reset errors
-    this.errors.emailError.set(null);
-    this.errors.passwordError.set(null);
+  /**
+   * Handles form submission
+   */
+  onSubmit(): void {
+    // Mark form as submitted
+    this.submitted = true;
 
-    // Validate
-    let isValid = true;
+    console.log("🚀 Submitting login form...:", this.loginForm.get("password")?.hasValidator(Validators.required));
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email || !emailRegex.test(email)) {
-      this.errors.emailError.set("Please enter a valid email address");
-      isValid = false;
+    // Check if form is valid
+    if (this.loginForm.invalid) {
+      console.warn("❌ Form is invalid. Please fix errors.");
+      return;
     }
 
-    if (!password || password.length < 8) {
-      this.errors.passwordError.set("Password must be at least 8 characters");
-      isValid = false;
-    }
+    // Get form values (type-safe!)
+    const { email, password } = this.loginForm.value;
 
-    // If valid, submit
-    if (isValid) {
-      console.log("Registration submitted:", {
-        name,
-        email,
-        password,
-      });
-      // Handle form submission (e.g., call API)
-      // form.reset(); // Optionally reset form after successful submission
-    }
+    console.log("🔐 Login attempt:", { email, password: "***" });
+
+    // Call AuthService login method
+    this.authService.login(email as string, password as string);
+
+    // Subscribe to authentication state
+    this.authService.isAuthenticated$.subscribe({
+      next: (isAuthenticated) => {
+        if (isAuthenticated) {
+          console.log("✅ Login successful! Navigating to /recipes...");
+          // Navigate to recipes page
+          this.router.navigate(["/recipes"]);
+        } else {
+          console.error("❌ Login failed: User not authenticated");
+        }
+      },
+      error: (err) => {
+        console.error("❌ Login error:", err);
+      },
+    });
   }
 }

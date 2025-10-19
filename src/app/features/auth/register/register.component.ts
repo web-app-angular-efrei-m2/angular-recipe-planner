@@ -1,24 +1,17 @@
-import { Component, inject, signal } from "@angular/core";
-import { FormsModule, type NgForm } from "@angular/forms";
+import { CommonModule } from "@angular/common";
+import { Component, inject } from "@angular/core";
+import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 import { Router, RouterLink } from "@angular/router";
 import { AuthService } from "@/app/core/services/auth";
+import { emailValidator, passwordValidator } from "@/app/shared/validators/auth";
 import { FieldComponent } from "@/shared/components/ui/form/field/field.component";
 import { cn } from "@/utils/classes";
 
-type FieldConfig = {
-  name: string;
-  type: string;
-  placeholder: string;
-  required: boolean;
-  errorKey: keyof RegisterComponent["errors"];
-  minlength?: number;
-};
-
 @Component({
   selector: "app-register",
-  imports: [RouterLink, FormsModule, FieldComponent],
+  imports: [RouterLink, ReactiveFormsModule, CommonModule, FieldComponent],
   template: `
-    <div class="min-h-screen flex flex-1 flex-col break-words rounded-sm border p-0 text-start font-semibold">
+    <div class="min-h-screen flex flex-1 flex-col break-words rounded-sm p-0 text-start font-semibold">
       <!-- Hero Image Section -->
       <div class="relative w-full h-[45vh] bg-gradient-to-br from-orange-100 via-amber-50 to-yellow-50 overflow-hidden">
         <div class="absolute inset-0 flex items-center justify-center">
@@ -40,13 +33,13 @@ type FieldConfig = {
       <!-- Form Section -->
       <div class="flex flex-1 flex-col p-6 gap-2">
         <!-- Register Form using Field Component -->
-        <form (ngSubmit)="onSubmit(registerForm)" #registerForm="ngForm" class="flex flex-col gap-4">
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
           <!-- Dynamic Form Fields -->
           @for (field of formFields; track field.name) {
             <app-field
-              [required]="field.required"
-              [invalid]="errors[field.errorKey]() !== null"
-              [errorText]="errors[field.errorKey]() || ''"
+              [required]="loginForm.get(field.name)?.hasValidator(Validators.required)"
+              [invalid]="loginForm.get(field.name)?.invalid && submitted"
+              [errorText]="getErrorMessage(field.name)"
             >
             <div class="relative isolate inline-flex justify-start gap-2 items-center">
               <div class="pointer-events-none absolute z-[2] flex h-full items-center justify-center pl-3 text-gray-400">
@@ -59,13 +52,11 @@ type FieldConfig = {
                 </div>
                 <input
                   [type]="field.type"
-                  [name]="field.name"
-                  ngModel
-                  [minlength]="field.minlength ?? null"
+                  [formControlName]="field.name"
                   [class]="
                     cn(
                       'input input-lg input-subtle pl-12 rounded-lg placeholder:text-gray-400',
-                      !errors[field.errorKey]() && 'focus-visible:outline-purple-500'
+                      loginForm.get(field.name)?.invalid && submitted && 'focus-visible:outline-purple-500'
                     )
                   "
                   [placeholder]="field.placeholder"
@@ -73,21 +64,18 @@ type FieldConfig = {
               </div>
             </app-field>
           }
-
           <!-- Terms & Conditions -->
           <div class="mt-2">
             <label class="flex items-center gap-3 cursor-pointer group">
               <input
+                [id]="'agreeToTerms'"
                 type="checkbox"
-                name="agreeToTerms"
-                ngModel
-                #agreeToTermsInput="ngModel"
-                required
-                [attr.aria-invalid]="errors.termsError() ? 'true' : null"
+                [formControlName]="'agreeToTerms'"
+                [attr.aria-invalid]="loginForm.get('agreeToTerms')?.invalid && submitted ? 'true' : null"
                 [class]="
                   cn(
-                    'input input-outline w-5 h-5 text-white border-2 rounded-md flex items-center justify-center checked:bg-purple-500 checked:border-purple-500 transition-colors duration-300 hover:outline-2 hover:-outline-offset-1 checked:before:content-[\\'✔\\']',
-                    errors.termsError() ? 'outline-[var(--color-error)]' :'outline-purple-500'
+                    'input input-outline w-5 h-5 text-white border-2 rounded-md flex items-center justify-center checked:bg-purple-500 checked:border-purple-500 transition-colors duration-300 hover:outline-2 hover:-outline-offset-1',
+                    loginForm.get('agreeToTerms')?.invalid  && submitted ? 'outline-[var(--color-error)]' :'outline-purple-500'
                   )
                 "
               />
@@ -97,11 +85,10 @@ type FieldConfig = {
                 & privacy policy.
               </span>
             </label>
-            @if (errors.termsError()) {
-              <span class="text-xs text-[var(--color-error)] mt-1.5 ml-8 block font-medium">{{ errors.termsError() }}</span>
+            @if (loginForm.get('agreeToTerms')?.invalid  && submitted) {
+              <span class="text-xs text-[var(--color-error)] mt-1.5 ml-8 block font-medium">{{ getErrorMessage('agreeToTerms') }}</span>
             }
           </div>
-
           <!-- Submit Button -->
           <button
             type="submit"
@@ -125,90 +112,114 @@ type FieldConfig = {
   `,
 })
 export class RegisterComponent {
-  protected readonly cn = cn;
   private authService = inject(AuthService);
   private router = inject(Router);
+  protected readonly cn = cn;
+  protected readonly Validators = Validators;
+  private fb = inject(FormBuilder);
+
+  // Track if form has been submitted
+  protected submitted = false;
 
   // Form fields configuration
-  formFields: FieldConfig[] = [
+  protected formFields = [
     {
       name: "email",
       type: "email",
       placeholder: "Email address",
-      required: true,
-      errorKey: "emailError",
     },
     {
       name: "password",
       type: "password",
       placeholder: "Password",
-      required: true,
-      errorKey: "passwordError",
-      minlength: 8,
     },
-  ];
+  ] as const;
 
-  // Error signals - only set on submit
-  errors = {
-    emailError: signal<string | null>(null),
-    passwordError: signal<string | null>(null),
-    termsError: signal<string | null>(null),
-  };
+  // Reactive Form Group
+  loginForm = this.fb.group(
+    {
+      email: [
+        "",
+        [
+          Validators.required,
+          emailValidator(), // Custom email validator
+        ],
+      ],
+      password: [
+        "",
+        [
+          Validators.required,
+          Validators.minLength(8), // Minimum 8 characters
+          passwordValidator(), // Custom validator
+        ],
+      ],
+      agreeToTerms: [false, [Validators.requiredTrue]],
+    },
+    {
+      updateOn: "submit", // Only validate when form is submitted, not on every input change
+    },
+  );
 
-  onSubmit(form: NgForm): void {
-    // Get form values from Angular's NgForm
-    const { name, email, password, agreeToTerms } = form.value;
+  getErrorMessage(name: string): string | undefined {
+    const control = this.loginForm.get(name);
+    if (control?.hasError("required")) {
+      if (name === "agreeToTerms") {
+        return "You must agree to the terms and privacy policy";
+      }
+      return `${name} is required`;
+    }
+    if (control?.hasError("invalidEmail")) {
+      const error = control.getError("invalidEmail");
+      return error.message || "Please enter a valid email address";
+    }
+    if (control?.hasError("minlength")) {
+      const requiredLength = control.getError("minlength").requiredLength;
+      return `Password must be at least ${requiredLength} characters`;
+    }
+    if (control?.hasError("invalidPassword")) {
+      const error = control.getError("invalidPassword");
+      return error.message || "Password must contain at least one uppercase letter and one digit";
+    }
+    return undefined;
+  }
 
-    // Reset errors
-    this.errors.emailError.set(null);
-    this.errors.passwordError.set(null);
-    this.errors.termsError.set(null);
+  /**
+   * Handles form submission
+   */
+  onSubmit(): void {
+    // Mark form as submitted
+    this.submitted = true;
 
-    // Validate
-    let isValid = true;
+    console.log("🚀 Submitting register form...:", this.loginForm.get("password")?.hasValidator(Validators.required));
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email || !emailRegex.test(email)) {
-      this.errors.emailError.set("Please enter a valid email address");
-      isValid = false;
+    // Check if form is valid
+    if (this.loginForm.invalid) {
+      console.warn("❌ Form is invalid. Please fix errors.");
+      return;
     }
 
-    if (!password || password.length < 8) {
-      this.errors.passwordError.set("Password must be at least 8 characters");
-      isValid = false;
-    }
+    // Get form values (type-safe!)
+    const { email, password } = this.loginForm.value;
 
-    if (!agreeToTerms) {
-      this.errors.termsError.set("You must agree to the terms and conditions");
-      isValid = false;
-    }
+    console.log("🔐 Login attempt:", { email, password: "***" });
 
-    // If valid, submit
-    if (isValid) {
-      console.log("Registration submitted:", {
-        name,
-        email,
-        password,
-        agreeToTerms,
-      });
+    // Call AuthService login method
+    this.authService.login(email as string, password as string);
 
-      // Call login to update the BehaviorSubject
-      this.authService.login(email, password);
-
-      // Option 1: Subscribe to the BehaviorSubject's Observable
-      // This will automatically get notified when auth state changes
-      this.authService.isAuthenticated$.subscribe({
-        next: (isAuthenticated) => {
-          if (isAuthenticated) {
-            console.log("✅ User authenticated successfully");
-            // Redirect to recipes page after successful registration
-            this.router.navigate(["/recipes"]);
-          }
-        },
-        error: (err) => {
-          console.error("❌ Registration failed:", err);
-        },
-      });
-    }
+    // Subscribe to authentication state
+    this.authService.isAuthenticated$.subscribe({
+      next: (isAuthenticated) => {
+        if (isAuthenticated) {
+          console.log("✅ Login successful! Navigating to /recipes...");
+          // Navigate to recipes page
+          this.router.navigate(["/recipes"]);
+        } else {
+          console.error("❌ Login failed: User not authenticated");
+        }
+      },
+      error: (err) => {
+        console.error("❌ Login error:", err);
+      },
+    });
   }
 }

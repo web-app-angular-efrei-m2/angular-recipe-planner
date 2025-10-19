@@ -109,7 +109,7 @@ export class FieldComponent implements AfterContentInit, OnChanges {
   /**
    * Indicates whether the field is disabled.
    */
-  disabled = input<boolean>();
+  disabled = input<boolean | undefined>();
 
   /**
    * Error text to display when field is invalid.
@@ -129,7 +129,7 @@ export class FieldComponent implements AfterContentInit, OnChanges {
   /**
    * Indicates whether the field is invalid.
    */
-  invalid = input<boolean>(false);
+  invalid = input<boolean | undefined>(false);
 
   /**
    * The label for the field.
@@ -144,12 +144,12 @@ export class FieldComponent implements AfterContentInit, OnChanges {
   /**
    * Indicates whether the field is read-only.
    */
-  readOnly = input<boolean>(false);
+  readOnly = input<boolean | undefined>(false);
 
   /**
    * Indicates whether the field is required.
    */
-  required = input<boolean>(false);
+  required = input<boolean | undefined>(false);
 
   private contentInitialized = false;
 
