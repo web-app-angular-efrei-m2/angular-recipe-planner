@@ -6,6 +6,13 @@
       "password": "Password1",
       "createdAt": 1760835884667,
       "updatedAt": 1760835884667
+    },
+    {
+      "id": "d243",
+      "email": "alex@email.com",
+      "password": "Password1",
+      "createdAt": 1760836959848,
+      "updatedAt": 1760836959848
     }
   ],
   "recipes": [],
