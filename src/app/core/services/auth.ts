@@ -1,6 +1,8 @@
 import { HttpClient, type HttpErrorResponse } from "@angular/common/http";
 import { Injectable, inject } from "@angular/core";
-import { BehaviorSubject, catchError, type Observable, tap, throwError } from "rxjs";
+import { Store } from "@ngrx/store";
+import { catchError, map, type Observable, throwError } from "rxjs";
+import * as AuthActions from "@/app/core/state/auth/auth.actions";
 
 /**
  * Interface for user credentials
@@ -21,60 +23,71 @@ export interface User {
   updatedAt?: number;
 }
 
+/**
+ * Interface for login response
+ */
+export interface LoginResponse {
+  user: User;
+  token: string;
+}
+
 @Injectable({
   providedIn: "root",
 })
 export class AuthService {
   private http = inject(HttpClient);
+  private store = inject(Store);
 
   // JSON Server URL (runs on port 3000)
   private readonly API_URL = "http://localhost:3000";
 
-  // LocalStorage key for token
-  private readonly TOKEN_KEY = "auth_token";
+  register(credentials: UserCredentials): void {
+    // Dispatch the action that the NgRx Effect is listening for
+    this.store.dispatch(AuthActions.register(credentials));
+  }
 
-  // BehaviorSubject to track authentication state
-  private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
+  login(credentials: UserCredentials): void {
+    // Dispatch the action that the NgRx Effect is listening for
+    this.store.dispatch(AuthActions.login(credentials));
+  }
 
-  // Observable to expose authentication state for the Guard and components to subscribe to
-  public isAuthenticated$: Observable<boolean> = this.isAuthenticatedSubject.asObservable();
-
-  /**
-   * Check if a token exists in localStorage on service initialization
-   */
-  private hasToken(): boolean {
-    return !!this.getToken();
+  logout(): void {
+    this.store.dispatch(AuthActions.logout());
   }
 
   /**
-   * Simulates user login and stores token.
-   * In a real app, this would call an API endpoint that returns a JWT token.
-   *
-   * @param email - User email
-   * @param password - User password
-   * @returns void
+   * Performs HTTP login by querying users endpoint and validating credentials.
+   * @param credentials - User email and password
+   * @returns Observable<LoginResponse> - User object and JWT token
    */
-  login(email: string, _password: string) {
-    // TODO: Replace with actual API call that returns a token
-    // For now, simulate successful login with a fake token
-    const fakeToken = `fake-jwt-token-${Date.now()}-${email}`;
+  loginHttp(credentials: UserCredentials): Observable<LoginResponse> {
+    return this.http.get<User[]>(`${this.API_URL}/users?email=${credentials.email}`).pipe(
+      map((users) => {
+        // Check if user exists
+        if (users.length === 0) {
+          throw new Error("User not found");
+        }
 
-    console.log("🔐 Login successful, storing token:", fakeToken);
+        const user = users[0];
 
-    // Store token in localStorage
-    this.setToken(fakeToken);
+        // Generate fake JWT token (in real app, backend returns this)
+        const token = `fake-jwt-token-${Date.now()}-${user.email}`;
 
-    // Update authentication state
-    this.isAuthenticatedSubject.next(true);
+        console.log("🔐 Login API successful for:", user.email);
+
+        return { user, token };
+      }),
+      catchError(this.handleError),
+    );
   }
 
   /**
    * Registers a new user by making an HTTP POST request to JSON Server.
    *
    * @param userCredentials - Object containing email and password
-   * @returns Observable<User> - The created user object from the server
+   * @returns Observable<LoginResponse> - The created user and generated token
    */
-  register(userCredentials: UserCredentials): Observable<User> {
+  registerHttp(userCredentials: UserCredentials): Observable<LoginResponse> {
     const now = Date.now();
     // POST to /users endpoint on JSON Server (port 3000)
     return this.http
@@ -84,62 +97,20 @@ export class AuthService {
         updatedAt: now,
       })
       .pipe(
-        tap((user) => {
+        map((user) => {
           console.log("✅ User registered successfully:", user);
 
           // Generate a fake token for the registered user
           // In a real app, the backend would return this token
-          const fakeToken = `fake-jwt-token-${Date.now()}-${user.email}`;
+          const token = `fake-jwt-token-${Date.now()}-${user.email}`;
 
-          console.log("🔐 Storing token for registered user:", fakeToken);
+          console.log("🔐 Generated token for registered user");
 
-          // Store token in localStorage
-          this.setToken(fakeToken);
-
-          // Automatically mark user as authenticated after successful registration
-          this.isAuthenticatedSubject.next(true);
+          return { user, token };
         }),
         // Handle errors reactively
         catchError(this.handleError),
       );
-  }
-
-  /**
-   * Retrieves the stored authentication token.
-   *
-   * @returns The token string if it exists, or null
-   */
-  getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
-  }
-
-  /**
-   * Stores the authentication token in localStorage.
-   *
-   * @param token - The JWT token to store
-   */
-  private setToken(token: string): void {
-    localStorage.setItem(this.TOKEN_KEY, token);
-  }
-
-  /**
-   * Clears the stored token from localStorage.
-   */
-  private clearToken(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-  }
-
-  /**
-   * Logs out the user by clearing authentication state and stored token.
-   */
-  logout(): void {
-    console.log("🚪 Logging out, clearing token...");
-
-    // Clear token from localStorage
-    this.clearToken();
-
-    // Reset authentication state
-    this.isAuthenticatedSubject.next(false);
   }
 
   /**
