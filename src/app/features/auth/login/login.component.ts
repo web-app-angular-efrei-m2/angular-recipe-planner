@@ -1,8 +1,10 @@
 import { CommonModule } from "@angular/common";
 import { Component, inject } from "@angular/core";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
-import { Router, RouterLink } from "@angular/router";
-import { AuthService } from "@/app/core/services/auth";
+import { RouterLink } from "@angular/router";
+import { Store } from "@ngrx/store";
+import { login } from "@/app/core/state/auth/auth.actions";
+import { selectAuthError, selectAuthLoading } from "@/app/core/state/auth/auth.selectors";
 import { emailValidator, passwordValidator } from "@/app/shared/validators/auth";
 import { FieldComponent } from "@/shared/components/ui/form/field/field.component";
 import { cn } from "@/utils/classes";
@@ -28,6 +30,21 @@ import { cn } from "@/utils/classes";
         <!-- Title -->
         <h2 class="text-2xl font-semibold text-gray-900">Welcome back!</h2>
         <p class="text-gray-400">Log in with your data that you entered during your registration.</p>
+        <!-- Error Message from Store -->
+        @if (authError$ | async; as error) {
+          <div class="alert alert-error font-semibold mt-2">
+            <span class="inline-flex items-center justify-center flex-shrink-0">
+              <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-[1lh] shrink-0 align-middle text-current leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
+            </span>
+            <span>{{ error }}</span>
+          </div>
+        }
+        <!-- Loading Indicator -->
+        @if (authLoading$ | async) {
+          <div class="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p class="text-sm text-blue-600">⏳ Logging in...</p>
+          </div>
+        }
       </div>
 
       <!-- Form Section -->
@@ -95,11 +112,14 @@ import { cn } from "@/utils/classes";
   `,
 })
 export class LoginComponent {
-  private authService = inject(AuthService);
-  private router = inject(Router);
+  private store = inject(Store);
   protected readonly cn = cn;
   protected readonly Validators = Validators;
   private fb = inject(FormBuilder);
+
+  // Select error and loading state from NgRx Store
+  protected authError$ = this.store.select(selectAuthError);
+  protected authLoading$ = this.store.select(selectAuthLoading);
 
   // Track if form has been submitted
   protected submitted = false;
@@ -164,12 +184,13 @@ export class LoginComponent {
 
   /**
    * Handles form submission
+   * Dispatches login action to NgRx Store instead of calling service directly
    */
   onSubmit(): void {
     // Mark form as submitted
     this.submitted = true;
 
-    console.log("🚀 Submitting login form...:", this.loginForm.get("password")?.hasValidator(Validators.required));
+    console.log("🚀 Submitting login form...");
 
     // Check if form is valid
     if (this.loginForm.invalid) {
@@ -182,23 +203,10 @@ export class LoginComponent {
 
     console.log("🔐 Login attempt:", { email, password: "***" });
 
-    // Call AuthService login method
-    this.authService.login(email as string, password as string);
+    // Dispatch login action to NgRx Store
+    // The effect will handle the HTTP call and state updates
+    this.store.dispatch(login({ email: email as string, password: password as string }));
 
-    // Subscribe to authentication state
-    this.authService.isAuthenticated$.subscribe({
-      next: (isAuthenticated) => {
-        if (isAuthenticated) {
-          console.log("✅ Login successful! Navigating to /recipes...");
-          // Navigate to recipes page
-          this.router.navigate(["/recipes"]);
-        } else {
-          console.error("❌ Login failed: User not authenticated");
-        }
-      },
-      error: (err) => {
-        console.error("❌ Login error:", err);
-      },
-    });
+    // No need to manually subscribe or navigate - effects handle that!
   }
 }

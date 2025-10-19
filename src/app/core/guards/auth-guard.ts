@@ -1,30 +1,30 @@
-import { Injectable, inject } from "@angular/core";
-import { type ActivatedRouteSnapshot, type CanActivate, Router, type RouterStateSnapshot, type UrlTree } from "@angular/router";
-import type { Observable } from "rxjs";
+import { inject } from "@angular/core";
+import { type CanActivateFn, Router } from "@angular/router";
+import { Store } from "@ngrx/store";
 import { map } from "rxjs/operators";
-import { AuthService } from "@/app/core/services/auth";
+import { selectIsAuthenticated } from "@/app/core/state/auth/auth.selectors";
 
-@Injectable({
-  providedIn: "root",
-})
-export class AuthGuard implements CanActivate {
-  private authService = inject(AuthService);
-  private router = inject(Router);
+/**
+ * Auth Guard
+ *
+ * Uses NgRx Store to check authentication state.
+ * If user is authenticated, allows access. Otherwise, redirects to login.
+ */
+export const authGuard: CanActivateFn = () => {
+  const store = inject(Store);
+  const router = inject(Router);
 
-  canActivate(_route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): Observable<boolean | UrlTree> {
-    // The core logic is here:
-    return this.authService.isAuthenticated$.pipe(
-      map((isAuthenticated) => {
-        if (isAuthenticated) {
-          // User is authenticated, allow access
-          return true;
-        }
+  // Select authentication state from NgRx Store
+  return store.select(selectIsAuthenticated).pipe(
+    map((isAuthenticated) => {
+      if (isAuthenticated) {
+        // User is authenticated, allow access
+        return true;
+      }
 
-        // User is not authenticated, redirect to login
-        console.warn("Access denied. Redirecting to login...");
-        this.router.navigate(["/auth/login"]);
-        return false;
-      }),
-    );
-  }
-}
+      // User is not authenticated, redirect to login
+      console.warn("⛔ Access denied. Redirecting to login...");
+      return router.createUrlTree(["/auth/login"]);
+    }),
+  );
+};
