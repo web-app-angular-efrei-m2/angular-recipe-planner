@@ -131,6 +131,9 @@
   /* INPUT COMPONENT STYLES */
   .input {
     @apply relative w-full appearance-none rounded-sm text-start focus-visible:outline-offset-0 disabled:cursor-disabled disabled:opacity-50;
+    &:checked {
+      @apply before:content-['✔'];
+    }
   }
   .input-invalid {
     @apply min-w-8 h-8 text-xs px-2;
@@ -180,16 +183,16 @@
     @apply rounded-sm bg-current/0 hover:bg-opacity-20 active:bg-opacity-25 disabled:bg-opacity-0;
   }
   .button-link {
-    @apply rounded-xs gap-1.5 decoration-current/20 underline-offset-3 hover:underline active:opacity-85 disabled:no-underline;
+    @apply rounded-xs gap-1.5 decoration-current/20 underline-offset-3 hover:underline active:opacity-85! disabled:no-underline;
   }
   .button-outline {
-    @apply rounded-sm border border-current/20 bg-current/0 hover:bg-opacity-20 active:bg-opacity-25 disabled:bg-opacity-0;
+    @apply rounded-sm border border-current/20 bg-current/0 hover:bg-opacity-20! active:bg-opacity-25! disabled:bg-opacity-0!;
   }
   .button-solid {
-    @apply rounded-sm bg-[var(--color-fg)] text-[var(--bg-contrast)] hover:bg-opacity-90 active:bg-opacity-85 disabled:bg-opacity-100;
+    @apply rounded-sm bg-[var(--color-fg)] text-[var(--bg-contrast)] hover:bg-opacity-90! active:bg-opacity-85! disabled:bg-opacity-100!;
   }
   .button-subtle {
-    @apply rounded-sm bg-current/15 hover:bg-opacity-20 active:bg-opacity-25 disabled:bg-opacity-10;
+    @apply rounded-sm bg-current/15 hover:bg-opacity-20! active:bg-opacity-25! disabled:bg-opacity-10!;
   }
   .button-unstyled {
     @apply h-auto min-w-0 gap-0 px-0 text-inherit;
