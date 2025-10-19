@@ -1,0 +1,15 @@
+{
+  "users": [
+    {
+      "id": "d063",
+      "email": "toto@email.com",
+      "password": "Password1",
+      "createdAt": 1760835884667,
+      "updatedAt": 1760835884667
+    }
+  ],
+  "recipes": [],
+  "ingredients": [],
+  "mealPlans": [],
+  "shoppingLists": []
+}
