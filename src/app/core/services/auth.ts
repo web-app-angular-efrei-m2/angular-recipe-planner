@@ -65,7 +65,7 @@ export class AuthService {
       map((users) => {
         // Check if user exists
         if (users.length === 0) {
-          throw new Error("User not found");
+          throw new Error("Invalid email or password");
         }
 
         const user = users[0];
@@ -122,9 +122,11 @@ export class AuthService {
     // Basic error handling for a training project
     let errorMessage = "An unknown error occurred!";
     if (error.error instanceof ErrorEvent) {
-      errorMessage = `Client Error: ${error.error.message}`;
+      errorMessage = `Client Error:\n${error.error.message}`;
+    } else if (error.message === "Invalid email or password") {
+      errorMessage = "Invalid email or password";
     } else {
-      errorMessage = `Server Error (Status ${error.status}): ${error.message}`;
+      errorMessage = `Server Error (Status ${error.status}):\n${error.message}`;
     }
     console.error(errorMessage);
     return throwError(() => new Error(errorMessage));
