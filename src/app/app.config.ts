@@ -1,11 +1,13 @@
 import { provideHttpClient, withFetch, withInterceptors } from "@angular/common/http";
 import { type ApplicationConfig, isDevMode, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from "@angular/core";
 import { provideRouter } from "@angular/router";
+import { provideEffects } from "@ngrx/effects";
 import { provideStore } from "@ngrx/store";
 import { provideStoreDevtools } from "@ngrx/store-devtools";
 
 import { routes } from "./app.routes";
 import { authInterceptor } from "./core/interceptors/auth.interceptor";
+import { AuthEffects } from "./core/state/auth/auth.effects";
 import { authFeatureKey, authReducer } from "./core/state/auth/auth.reducer";
 
 export const appConfig: ApplicationConfig = {
@@ -21,6 +23,8 @@ export const appConfig: ApplicationConfig = {
     provideStore({
       [authFeatureKey]: authReducer, // Register auth reducer
     }),
+    // NgRx Effects
+    provideEffects([AuthEffects]),
     // NgRx DevTools (only in development)
     provideStoreDevtools({
       maxAge: 25, // Retains last 25 states
