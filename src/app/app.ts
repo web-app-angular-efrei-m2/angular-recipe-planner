@@ -1,8 +1,8 @@
 import { AsyncPipe } from "@angular/common";
-import { Component, inject, signal } from "@angular/core";
+import { Component, inject, type OnInit, signal } from "@angular/core";
 import { RouterLink, RouterOutlet } from "@angular/router";
 import { Store } from "@ngrx/store";
-import { logout } from "@/app/core/state/auth/auth.actions";
+import { loadUserFromStorage, logout } from "@/app/core/state/auth/auth.actions";
 import { selectIsAuthenticated, selectUserEmail } from "@/app/core/state/auth/auth.selectors";
 import { cn } from "@/utils/classes";
 
@@ -51,7 +51,7 @@ import { cn } from "@/utils/classes";
     <router-outlet></router-outlet>
   `,
 })
-export class App {
+export class App implements OnInit {
   private store = inject(Store);
 
   protected readonly title = signal("angular-recipe-planner");
@@ -60,6 +60,15 @@ export class App {
   // Select authentication state from NgRx Store using async pipe
   protected isLoggedIn$ = this.store.select(selectIsAuthenticated);
   protected userEmail$ = this.store.select(selectUserEmail);
+
+  /**
+   * On app initialization, check if user has a valid token in localStorage
+   * and restore their session
+   */
+  ngOnInit(): void {
+    console.log("🚀 App initialized - checking for stored authentication...");
+    this.store.dispatch(loadUserFromStorage());
+  }
 
   /**
    * Handles logout action

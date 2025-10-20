@@ -15,7 +15,201 @@
       "updatedAt": 1760836959848
     }
   ],
-  "recipes": [],
+  "recipes": [
+    {
+      "id": "1",
+      "title": "Classic Spaghetti Carbonara",
+      "description": "A traditional Italian pasta dish with eggs, cheese, bacon, and black pepper. This creamy and delicious recipe is perfect for a quick weeknight dinner.",
+      "ingredients": [
+        "400g spaghetti",
+        "200g pancetta or bacon",
+        "4 large eggs",
+        "100g Parmesan cheese, grated",
+        "Black pepper to taste",
+        "Salt for pasta water"
+      ],
+      "instructions": "Cook spaghetti according to package directions. Meanwhile, fry pancetta until crispy. Beat eggs with Parmesan and pepper. Drain pasta, reserving 1 cup pasta water. Toss hot pasta with pancetta, then remove from heat and stir in egg mixture, adding pasta water as needed for creaminess.",
+      "prepTime": 10,
+      "cookTime": 20,
+      "servings": 4,
+      "category": "Italian",
+      "createdAt": 1729350000000,
+      "updatedAt": 1729350000000
+    },
+    {
+      "id": "2",
+      "title": "Chicken Tikka Masala",
+      "description": "Tender pieces of marinated chicken in a rich, creamy tomato-based sauce with aromatic spices. A beloved Indian dish that's full of flavor.",
+      "ingredients": [
+        "500g chicken breast, cubed",
+        "1 cup yogurt",
+        "2 tbsp tikka masala spice",
+        "400ml coconut cream",
+        "400g crushed tomatoes",
+        "1 onion, diced",
+        "3 garlic cloves",
+        "Fresh cilantro"
+      ],
+      "instructions": "Marinate chicken in yogurt and half the spice for 2 hours. Sauté onion and garlic, add remaining spice. Add tomatoes and simmer. Grill chicken, then add to sauce with coconut cream. Simmer 15 minutes. Garnish with cilantro.",
+      "prepTime": 130,
+      "cookTime": 30,
+      "servings": 6,
+      "category": "Indian",
+      "createdAt": 1729350100000,
+      "updatedAt": 1729350100000
+    },
+    {
+      "id": "3",
+      "title": "Caesar Salad",
+      "description": "Fresh romaine lettuce with homemade Caesar dressing, croutons, and Parmesan. A classic salad that's simple yet sophisticated.",
+      "ingredients": [
+        "2 romaine lettuce heads",
+        "1/2 cup Caesar dressing",
+        "1 cup croutons",
+        "1/2 cup Parmesan shavings",
+        "Lemon wedges"
+      ],
+      "instructions": "Wash and chop romaine. Toss with Caesar dressing. Top with croutons and Parmesan. Serve with lemon wedges.",
+      "prepTime": 15,
+      "cookTime": 0,
+      "servings": 4,
+      "category": "Salad",
+      "createdAt": 1729350200000,
+      "updatedAt": 1729350200000
+    },
+    {
+      "id": "4",
+      "title": "Tacos al Pastor",
+      "description": "Authentic Mexican street tacos with marinated pork, pineapple, and fresh toppings. A flavor explosion in every bite!",
+      "ingredients": [
+        "500g pork shoulder, thinly sliced",
+        "3 tbsp achiote paste",
+        "1/2 fresh pineapple, diced",
+        "Corn tortillas",
+        "White onion, diced",
+        "Fresh cilantro",
+        "Lime wedges",
+        "Salsa verde"
+      ],
+      "instructions": "Marinate pork in achiote paste overnight. Grill pork and pineapple until charred. Warm tortillas. Assemble tacos with pork, pineapple, onion, and cilantro. Serve with lime and salsa.",
+      "prepTime": 20,
+      "cookTime": 15,
+      "servings": 6,
+      "category": "Mexican",
+      "createdAt": 1729350300000,
+      "updatedAt": 1729350300000
+    },
+    {
+      "id": "5",
+      "title": "Pad Thai",
+      "description": "Thailand's most famous noodle dish with shrimp, tofu, peanuts, and a perfect balance of sweet, sour, and savory flavors.",
+      "ingredients": [
+        "200g rice noodles",
+        "200g shrimp, peeled",
+        "100g firm tofu, cubed",
+        "2 eggs",
+        "3 tbsp tamarind paste",
+        "2 tbsp fish sauce",
+        "Bean sprouts",
+        "Crushed peanuts",
+        "Lime wedges"
+      ],
+      "instructions": "Soak noodles until soft. Make sauce with tamarind and fish sauce. Stir-fry shrimp and tofu, push aside. Scramble eggs. Add noodles and sauce. Toss everything together. Top with peanuts and bean sprouts.",
+      "prepTime": 20,
+      "cookTime": 10,
+      "servings": 4,
+      "category": "Thai",
+      "createdAt": 1729350400000,
+      "updatedAt": 1729350400000
+    },
+    {
+      "id": "6",
+      "title": "Classic Beef Burger",
+      "description": "Juicy homemade beef patties with melted cheese, crispy bacon, and all your favorite toppings. The ultimate American comfort food!",
+      "ingredients": [
+        "500g ground beef (80/20)",
+        "4 burger buns",
+        "4 slices cheddar cheese",
+        "8 bacon strips",
+        "Lettuce, tomato, onion",
+        "Pickles",
+        "Mayo, ketchup, mustard"
+      ],
+      "instructions": "Form beef into 4 patties, season with salt and pepper. Cook bacon until crispy. Grill burgers 4 minutes per side, add cheese to melt. Toast buns. Assemble burgers with all toppings.",
+      "prepTime": 15,
+      "cookTime": 15,
+      "servings": 4,
+      "category": "American",
+      "createdAt": 1729350500000,
+      "updatedAt": 1729350500000
+    },
+    {
+      "id": "7",
+      "title": "Sushi Rolls",
+      "description": "Homemade California rolls with crab, avocado, and cucumber. Fresh, healthy, and surprisingly easy to make at home!",
+      "ingredients": [
+        "2 cups sushi rice",
+        "4 nori sheets",
+        "200g imitation crab",
+        "1 avocado, sliced",
+        "1 cucumber, julienned",
+        "Rice vinegar",
+        "Soy sauce",
+        "Wasabi",
+        "Pickled ginger"
+      ],
+      "instructions": "Cook rice and season with rice vinegar. Lay nori on bamboo mat. Spread rice, flip over. Add fillings in a line. Roll tightly. Slice into 8 pieces. Serve with soy sauce, wasabi, and ginger.",
+      "prepTime": 30,
+      "cookTime": 20,
+      "servings": 4,
+      "category": "Japanese",
+      "createdAt": 1729350600000,
+      "updatedAt": 1729350600000
+    },
+    {
+      "id": "8",
+      "title": "Chocolate Lava Cake",
+      "description": "Decadent individual chocolate cakes with a molten center. The perfect dessert to impress your guests!",
+      "ingredients": [
+        "100g dark chocolate",
+        "100g butter",
+        "2 eggs",
+        "2 egg yolks",
+        "1/4 cup sugar",
+        "2 tbsp flour",
+        "Vanilla ice cream",
+        "Powdered sugar for dusting"
+      ],
+      "instructions": "Melt chocolate and butter together. Whisk eggs, yolks, and sugar until thick. Fold in chocolate mixture and flour. Pour into greased ramekins. Bake at 425°F for 12 minutes. Let rest 1 minute, invert onto plates. Serve with ice cream.",
+      "prepTime": 15,
+      "cookTime": 12,
+      "servings": 4,
+      "category": "Dessert",
+      "createdAt": 1729350700000,
+      "updatedAt": 1729350700000
+    },
+    {
+      "id": "9",
+      "title": "Avocado Toast",
+      "description": "The trendy breakfast favorite! Creamy avocado on crispy sourdough with a perfectly poached egg and everything bagel seasoning.",
+      "ingredients": [
+        "2 slices sourdough bread",
+        "1 ripe avocado",
+        "2 eggs",
+        "Everything bagel seasoning",
+        "Red pepper flakes",
+        "Lemon juice",
+        "Extra virgin olive oil"
+      ],
+      "instructions": "Toast bread until golden. Mash avocado with lemon juice, salt, and pepper. Poach eggs in simmering water. Spread avocado on toast. Top with poached egg. Drizzle with olive oil and sprinkle with seasonings.",
+      "prepTime": 5,
+      "cookTime": 10,
+      "servings": 2,
+      "category": "Breakfast",
+      "createdAt": 1729350800000,
+      "updatedAt": 1729350800000
+    }
+  ],
   "ingredients": [],
   "mealPlans": [],
   "shoppingLists": []

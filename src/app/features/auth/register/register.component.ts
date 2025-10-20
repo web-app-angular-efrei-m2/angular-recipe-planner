@@ -1,10 +1,10 @@
 import { CommonModule } from "@angular/common";
-import { Component, inject } from "@angular/core";
+import { Component, inject, type OnInit } from "@angular/core";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
-import { RouterLink } from "@angular/router";
+import { Router, RouterLink } from "@angular/router";
 import { Store } from "@ngrx/store";
 import { register } from "@/app/core/state/auth/auth.actions";
-import { selectAuthError, selectAuthLoading } from "@/app/core/state/auth/auth.selectors";
+import { selectAuthError, selectAuthLoading, selectIsAuthenticated } from "@/app/core/state/auth/auth.selectors";
 import { emailValidator, passwordValidator } from "@/app/shared/validators/auth";
 import { FieldComponent } from "@/shared/components/ui/form/field/field.component";
 import { cn } from "@/utils/classes";
@@ -128,11 +128,15 @@ import { cn } from "@/utils/classes";
     </div>
   `,
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
   private store = inject(Store);
+  private router = inject(Router);
   protected readonly cn = cn;
   protected readonly Validators = Validators;
   private fb = inject(FormBuilder);
+
+  // Select authentication state from NgRx Store using async pipe
+  protected isLoggedIn$ = this.store.select(selectIsAuthenticated);
 
   // Select error and loading state from NgRx Store
   protected authError$ = this.store.select(selectAuthError);
@@ -179,6 +183,15 @@ export class RegisterComponent {
       updateOn: "submit", // Only validate when form is submitted, not on every input change
     },
   );
+
+  ngOnInit(): void {
+    this.isLoggedIn$.subscribe((isLoggedIn) => {
+      if (isLoggedIn) {
+        console.log("✅ User is already logged in, redirecting...");
+        this.router.navigate(["/"]);
+      }
+    });
+  }
 
   getErrorMessage(name: string): string | undefined {
     const control = this.registrationForm.get(name);

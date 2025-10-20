@@ -128,6 +128,11 @@
 }
 
 @layer components {
+  /* LINK OVERLAY COMPONENT STYLES */
+  .link-overlay {
+    @apply static before:absolute before:inset-0 before:block before:cursor-[inherit] before:content-[''] hover:no-underline;
+
+  }
   /* INPUT COMPONENT STYLES */
   .input {
     @apply relative w-full appearance-none rounded-sm text-start focus-visible:outline-offset-0 disabled:cursor-disabled disabled:opacity-50;
