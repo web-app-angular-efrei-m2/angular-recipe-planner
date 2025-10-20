@@ -1,10 +1,10 @@
 import { CommonModule } from "@angular/common";
-import { Component, inject } from "@angular/core";
+import { Component, inject, type OnInit } from "@angular/core";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
-import { RouterLink } from "@angular/router";
+import { Router, RouterLink } from "@angular/router";
 import { Store } from "@ngrx/store";
 import { login } from "@/app/core/state/auth/auth.actions";
-import { selectAuthError, selectAuthLoading } from "@/app/core/state/auth/auth.selectors";
+import { selectAuthError, selectAuthLoading, selectIsAuthenticated } from "@/app/core/state/auth/auth.selectors";
 import { emailValidator, passwordValidator } from "@/app/shared/validators/auth";
 import { FieldComponent } from "@/shared/components/ui/form/field/field.component";
 import { cn } from "@/utils/classes";
@@ -34,7 +34,7 @@ import { cn } from "@/utils/classes";
         @if (authError$ | async; as error) {
           <div class="alert alert-error font-semibold mt-2">
             <span class="inline-flex items-center justify-center flex-shrink-0">
-              <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-[1lh] shrink-0 align-middle text-current leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
+              <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-[1lh] shrink-0 align-middle text-current leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
             </span>
             <span>{{ error }}</span>
           </div>
@@ -111,11 +111,15 @@ import { cn } from "@/utils/classes";
     </div>
   `,
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private store = inject(Store);
+  private router = inject(Router);
   protected readonly cn = cn;
   protected readonly Validators = Validators;
   private fb = inject(FormBuilder);
+
+  // Select authentication state from NgRx Store using async pipe
+  protected isLoggedIn$ = this.store.select(selectIsAuthenticated);
 
   // Select error and loading state from NgRx Store
   protected authError$ = this.store.select(selectAuthError);
@@ -161,6 +165,15 @@ export class LoginComponent {
       updateOn: "submit", // Only validate when form is submitted, not on every input change
     },
   );
+
+  ngOnInit(): void {
+    this.isLoggedIn$.subscribe((isLoggedIn) => {
+      if (isLoggedIn) {
+        console.log("✅ User is already logged in, redirecting...");
+        this.router.navigate(["/"]);
+      }
+    });
+  }
 
   getErrorMessage(name: string): string | undefined {
     const control = this.loginForm.get(name);

@@ -166,14 +166,22 @@ export class AuthEffects {
         // In a real app, decode the JWT or make API call to validate/get user
         // For now, extract email from fake token
         const emailMatch = token.match(/fake-jwt-token-\d+-(.+)/);
-        const email = emailMatch ? emailMatch[1] : "unknown@example.com";
+        const email = emailMatch ? emailMatch[1] : null;
+
+        if (!email) {
+          console.warn("⚠️ Invalid token format, clearing localStorage");
+          localStorage.removeItem(TOKEN_KEY);
+          return of({ type: "NO_ACTION" });
+        }
 
         return this.authService.loginHttp({ email, password: "" }).pipe(
           map(({ user }) => {
             console.log("🎯 Effect: Login successful, token stored");
             return AuthActions.loadUserFromStorageSuccess({ user, token });
           }),
-          catchError(() => {
+          catchError((error) => {
+            console.error("❌ Failed to restore session:", error.message);
+            localStorage.removeItem(TOKEN_KEY);
             return of({ type: "NO_ACTION" });
           }),
         );
