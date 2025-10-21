@@ -128,10 +128,18 @@
 }
 
 @layer components {
+  /* ACCORDION COMPONENT STYLES */
+  .accordion {
+    &::details-content {
+      @apply transition-all transition-discrete duration-300 ease-in-out overflow-hidden h-full max-h-0;
+    }
+    &[open]::details-content {
+      @apply max-h-[var(--height)];
+    }
+  }
   /* LINK OVERLAY COMPONENT STYLES */
   .link-overlay {
     @apply static before:absolute before:inset-0 before:block before:cursor-[inherit] before:content-[''] hover:no-underline;
-
   }
   /* INPUT COMPONENT STYLES */
   .input {
