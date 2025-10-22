@@ -1,16 +1,18 @@
-import { AsyncPipe, CommonModule } from "@angular/common";
+import { CommonModule } from "@angular/common";
 import { Component, inject, type OnInit, signal } from "@angular/core";
 import { ActivatedRoute, RouterLink } from "@angular/router";
-import { catchError, type Observable, of, switchMap, tap } from "rxjs";
 import { type Recipe, RecipeService } from "@/app/core/services/recipe.service";
+import type { Review } from "@/app/core/services/review.service";
+import { ReviewService } from "@/app/core/services/review.service";
 import { DifficultyLevelPipe } from "@/app/shared/pipes/difficulty-level.pipe";
+import { RatingPipe } from "@/app/shared/pipes/rating.pipe";
 import { cn } from "@/utils/classes";
 
 @Component({
   selector: "app-recipe-detail",
-  imports: [CommonModule, AsyncPipe, RouterLink, DifficultyLevelPipe],
+  imports: [CommonModule, RouterLink, DifficultyLevelPipe, RatingPipe],
   template: `
-    <div class="flex flex-1 flex-col h-[calc(100dvh-97px)] break-words rounded-sm text-start font-semibold text-gray-400 bg-purple-100">
+    <div class="flex flex-1 flex-col h-dvh break-words rounded-sm text-start font-semibold text-gray-400 bg-purple-100">
       <!-- navigation buttons  -->
       <div class="flex items-center justify-between px-6 pt-6">
         <a routerLink="/recipes" class="button button-sm button-solid rounded-full bg-white p-0">
@@ -48,7 +50,7 @@ import { cn } from "@/utils/classes";
         </div>
       }
       <!-- Recipe Content using async pipe -->
-      @if (recipe$ | async; as recipe) {
+      @if (recipe()) {
         <!-- media gallery   -->
         <div class="flex items-center justify-center mt-auto pb-6">
           <div class="p-1.5 rounded-xl overflow-hidden bg-white max-w-3/4">
@@ -63,20 +65,20 @@ import { cn } from "@/utils/classes";
         <article class="flex flex-col gap-4 h-4/6 p-6 rounded-t-2xl bg-white overflow-auto">
           <!-- category & rating   -->
           <div class="flex items-center gap-1 text-sm">
-            <span class="mr-auto">{{ recipe?.category }}</span>
+            <span class="mr-auto">{{ recipe()?.category }}</span>
             <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-4 min-h-[1lh] shrink-0 align-middle text-yellow-500 fill-current leading-[1em]"  height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path></svg>
-            <span>4.9</span>
+            <span>{{ reviews() | rating:'average' }}</span>
           </div>
           <!-- title & difficulty  -->
           <div class="flex justify-between">
-            <h2 class="text-xl font-semibold text-gray-900 max-w-3/4">{{ recipe?.title }}</h2>
+            <h2 class="text-xl font-semibold text-gray-900 max-w-3/4">{{ recipe()?.title }}</h2>
             <svg
             [class]="
               cn(
                 'inline-block size-5 min-h-[1lh] shrink-0 align-middle leading-[1em] mt-0.5',
-                (recipe | difficultyLevel) === 'Easy' && 'text-green-500',
-                (recipe | difficultyLevel) === 'Medium' && 'text-yellow-500',
-                (recipe | difficultyLevel) === 'Advanced' && 'text-red-500'
+                (recipe() | difficultyLevel) === 'Easy' && 'text-green-500',
+                (recipe() | difficultyLevel) === 'Medium' && 'text-yellow-500',
+                (recipe() | difficultyLevel) === 'Advanced' && 'text-red-500'
               )
             "
             stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><rect width="18" height="18" x="3" y="3" rx="2"></rect><circle cx="12" cy="12" r="1"></circle></svg>
@@ -102,7 +104,7 @@ import { cn } from "@/utils/classes";
           <!-- description   -->
           <div class="flex flex-col gap-1.5">
             <p class="text-md text-gray-800">Description</p>
-            <p class="text-sm line-clamp-3">{{ recipe?.description }}</p>
+            <p class="text-sm line-clamp-3">{{ recipe()?.description }}</p>
           </div>
           <!-- cooking time   -->
           <div class="flex gap-2">
@@ -112,7 +114,7 @@ import { cn } from "@/utils/classes";
               </span>
               <div class="flex flex-col">
                 <span class="text-xs text-gray-500">Cooking Time</span>
-                <span class="text-sm text-purple-500">{{ recipe?.cookTime }} min</span>
+                <span class="text-sm text-purple-500">{{ recipe()?.cookTime }} min</span>
               </div>
             </div>
             <div class="flex flex-1 items-center gap-2 p-2 rounded-xl bg-gray-100">
@@ -121,7 +123,7 @@ import { cn } from "@/utils/classes";
               </span>
               <div class="flex flex-col">
                 <span class="text-xs text-gray-500">Cuisine</span>
-                <span class="text-sm text-purple-500">{{ recipe?.category }}</span>
+                <span class="text-sm text-purple-500">{{ recipe()?.category }}</span>
               </div>
             </div>
           </div>
@@ -130,19 +132,74 @@ import { cn } from "@/utils/classes";
             <summary class="button button-lg justify-start gap-1 w-full">
               <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-[1lh] shrink-0 align-middle text-purple-500 leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="M12 3V2"></path><path d="m15.4 17.4 3.2-2.8a2 2 0 1 1 2.8 2.9l-3.6 3.3c-.7.8-1.7 1.2-2.8 1.2h-4c-1.1 0-2.1-.4-2.8-1.2l-1.302-1.464A1 1 0 0 0 6.151 19H5"></path><path d="M2 14h12a2 2 0 0 1 0 4h-2"></path><path d="M4 10h16"></path><path d="M5 10a7 7 0 0 1 14 0"></path><path d="M5 14v6a1 1 0 0 1-1 1H2"></path></svg>
               <span class="text-sm mr-auto">Ingredients</span>
-              <span class="text-sm">{{ recipe?.servings }} Serving</span>
+              <span class="text-sm">{{ recipe()?.servings }} Serving</span>
               <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-[1lh] shrink-0 align-middle text-purple-500 leading-[1em] transition-[rotate] duration-300 group-open:rotate-180" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="m6 9 6 6 6-6"></path></svg>
             </summary>
             <div class="h-full px-4 pb-2">
               <ul class="flex flex-col list-disc h-full overflow-auto">
-                @for (ingredient of recipe?.ingredients; track $index) {
+                @for (ingredient of recipe()?.ingredients; track $index) {
                   <li class="whitespace-normal items-center text-sm ml-6 marker:text-purple-500/60">{{ ingredient }}</li>
                 }
               </ul>
             </div>
           </details>
+          <!-- ratings  -->
+          @if ((reviews() | rating:'average') > 0) {
+            <div class="flex flex-col">
+              <div class="flex items-center gap-2 p-4 rounded-2xl bg-gray-100">
+                <div class="flex flex-1 flex-col gap-4">
+                  <dl class="relative flex flex-1 flex-col">
+                    <dd class="align-baseline font-semibold tracking-tight proportional-nums inline-flex items-end gap-1 text-gray-800">
+                      <span class="text-2xl">{{ reviews() | rating:'average' }}</span>
+                      <span class="text-sm leading-6">/5</span>
+                    </dd>
+                    <dt class="inline-flex gap-1.5 items-center text-sm">Based on {{ reviews().length }} Reviews</dt>
+                  </dl>
+                  <ol class="flex items-center gap-1">
+                    @for (rating of [1, 2, 3, 4, 5]; track rating) {
+                      <li class="inline-flex items-center gap-2">
+                        @if (rating === Math.ceil(reviews() | rating:'average') && (reviews() | rating:'average') % 1 !== 0) {
+                          <span class="relative flex items-center">
+                            <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-[1lh] shrink-0 align-middle text-yellow-400 fill-current leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="M12 18.338a2.1 2.1 0 0 0-.987.244L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.12 2.12 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.12 2.12 0 0 0 1.597-1.16l2.309-4.679A.53.53 0 0 1 12 2"></path></svg>
+                            <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="absolute inline-block size-5 min-h-[1lh] shrink-0 align-middle text-gray-200 fill-current leading-[1em] -scale-x-100" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="M12 18.338a2.1 2.1 0 0 0-.987.244L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.12 2.12 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.12 2.12 0 0 0 1.597-1.16l2.309-4.679A.53.53 0 0 1 12 2"></path></svg>
+                          </span>
+                        }
+                        @else {
+                          <span class="relative flex items-center">
+                            <svg
+                              [class]="
+                                cn(
+                                  'inline-block size-5 min-h-[1lh] shrink-0 align-middle text-current fill-current leading-[1em]',
+                                  rating <= (reviews() | rating:'average') ? 'text-yellow-400' : 'text-gray-200'
+                                )
+                              "
+                              stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
+                            </svg>
+                          </span>
+                        }
+                      </li>
+                    }
+                  </ol>
+                </div>
+                <ol class="flex flex-1 flex-col gap-2">
+                  @for (rating of [5,4,3,2,1]; track rating) {
+                    <li class="inline-flex items-center gap-2">
+                      <span class="text-xs">{{ rating }} Star</span>
+                      <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          class="h-full bg-yellow-400 transition-all"
+                          [style.width.%]="reviews() | rating:'percentage':rating"
+                        ></div>
+                      </div>
+                      <span class="text-xs">{{ reviews() | rating:'count':rating }}</span>
+                    </li>
+                  }
+                </ol>
+              </div>
+            </div>
+          }
           <!-- reviews   -->
-          <a routerLink="#" class="button button-lg button-subtle justify-start rounded-xl font-semibold text-gray-500 bg-gray-100 open:[--height:96px]">
+          <a [routerLink]="['/recipes', recipe()?.id, 'reviews']" class="button button-lg button-subtle justify-start rounded-xl font-semibold text-gray-500 bg-gray-100 open:[--height:96px]">
             <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-4 min-h-[1lh] shrink-0 align-middle text-current leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M8 10h.01"></path><path d="M12 10h.01"></path><path d="M16 10h.01"></path></svg>
             <span class="mr-auto">Reviews</span>
             <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-[1lh] shrink-0 align-middle text-purple-500 leading-[1em] -rotate-90" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="m6 9 6 6 6-6"></path></svg>
@@ -155,67 +212,55 @@ import { cn } from "@/utils/classes";
 export class RecipeDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private recipeService = inject(RecipeService);
+  private readonly reviewService = inject(ReviewService);
+  protected reviews = signal<Review[]>([]);
 
   protected readonly cn = cn;
+  protected readonly Math = Math;
 
-  protected recipe$: Observable<Recipe> | null = null;
+  protected recipeId = signal<string>("");
+  protected recipe = signal<Recipe | null>(null);
+  // protected recipe$: Observable<Recipe> | null = null;
   // Signal for loading state
   protected loading = signal<boolean>(false);
   // Signal for error state
   protected error = signal<string | null>(null);
 
   ngOnInit(): void {
-    console.log("🔍 RecipeDetailComponent initialized - reading route parameter...");
+    // Get recipeId from route params
+    const id = this.route.snapshot.paramMap.get("id");
+    if (id) {
+      this.recipeId.set(id);
+      this.loadRecipe();
+      this.loadReviews();
+    }
+  }
 
-    /**
-     * CRITICAL: Observable-based parameter handling ⭐⭐⭐
-     *
-     * this.route.paramMap is an Observable that emits whenever route params change
-     * We use switchMap to:
-     * 1. Get the latest param value
-     * 2. Cancel any pending HTTP request
-     * 3. Start a new HTTP request with the new ID
-     */
-    this.recipe$ = this.route.paramMap.pipe(
-      // Log the parameter extraction
-      tap((params) => {
-        const id = params.get("id");
-        console.log(`📌 Route parameter 'id' extracted: ${id}`);
-        this.loading.set(true);
-        this.error.set(null);
-      }),
+  private loadRecipe(): void {
+    this.recipeService.getRecipeById(this.recipeId()).subscribe({
+      next: (recipe) => {
+        this.recipe.set(recipe);
+        console.log("✅ Recipe loaded:", recipe);
+      },
+      error: (error: Error) => {
+        console.error("❌ Failed to load recipe:", error);
+      },
+    });
+  }
 
-      // switchMap: Cancel previous request and switch to new one
-      switchMap((params) => {
-        const id = params.get("id");
-
-        // Validate ID exists
-        if (!id) {
-          console.error("❌ No ID parameter found in route");
-          this.loading.set(false);
-          this.error.set("Recipe ID is missing");
-          return of(null as unknown as Recipe); // Return empty observable
-        }
-
-        console.log(`🌐 Fetching recipe with ID: ${id}`);
-
-        // Make HTTP request to get recipe by ID
-        return this.recipeService.getRecipeById(id).pipe(
-          // Success handler
-          tap((recipe) => {
-            console.log("✅ Recipe loaded successfully:", recipe?.title);
-            this.loading.set(false);
-          }),
-
-          // Error handler
-          catchError((error) => {
-            console.error("❌ Failed to load recipe:", error);
-            this.loading.set(false);
-            this.error.set(error.message || "Failed to load recipe. Please try again.");
-            return of(null as unknown as Recipe); // Return empty to prevent template errors
-          }),
-        );
-      }),
-    );
+  private loadReviews(): void {
+    this.reviewService.getReviewsByRecipeId(this.recipeId()).subscribe({
+      next: (reviews) => {
+        // Reviews already have author data populated by the service
+        const sortedReviews = reviews.sort((a, b) => b.createdAt - a.createdAt);
+        this.reviews.set(sortedReviews);
+        console.log("✅ Reviews loaded:", reviews.length);
+        this.loading.set(false);
+      },
+      error: (error: Error) => {
+        console.error("❌ Failed to load reviews:", error);
+        this.loading.set(false);
+      },
+    });
   }
 }

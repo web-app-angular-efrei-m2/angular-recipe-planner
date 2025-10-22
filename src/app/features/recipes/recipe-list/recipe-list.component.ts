@@ -1,12 +1,16 @@
 import { Component, computed, inject, type OnInit, signal } from "@angular/core";
 import { RouterLink } from "@angular/router";
+import { forkJoin } from "rxjs";
 import { type Recipe, RecipeService } from "@/app/core/services/recipe.service";
+import type { Review } from "@/app/core/services/review.service";
+import { ReviewService } from "@/app/core/services/review.service";
 import { DifficultyLevelPipe } from "@/app/shared/pipes/difficulty-level.pipe";
+import { RatingPipe } from "@/app/shared/pipes/rating.pipe";
 import { cn } from "@/utils/classes";
 
 @Component({
   selector: "app-recipe-list",
-  imports: [RouterLink, DifficultyLevelPipe],
+  imports: [RouterLink, DifficultyLevelPipe, RatingPipe],
   template: `
     <div class="container mx-auto px-4 max-w-7xl font-semibold text-gray-400">
       <!-- greeting -->
@@ -97,7 +101,14 @@ import { cn } from "@/utils/classes";
               <div class="relative flex flex-col shrink-0 break-words rounded-2xl text-start max-w-2xs aspect-landscape bg-purple-100 snap-start scale-95 hover:cursor-pointer hover:scale-100 transition-[scale] duration-700"
               >
                 <div class="flex items-center justify-between p-2">
-                  <span class="inline-flex items-center rounded-2xl tabular-nums whitespace-nowrap select-none px-2 min-h-6 text-sm bg-white text-contrast">🍝 4.8 (1k+ Reviews)</span>
+                @if (reviews().has(recipe.id)) {
+                    <span class="inline-flex items-center rounded-2xl tabular-nums whitespace-nowrap select-none px-2 min-h-6 text-sm bg-white text-contrast">
+                      🍝
+                      <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-4 min-h-[1lh] shrink-0 align-middle text-yellow-500 fill-current leading-[1em]"  height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path></svg>
+                      <span> {{ reviews().get(recipe.id)! | rating: 'average' }} ({{reviews().get(recipe.id)?.length}} Reviews)
+                      </span>
+                    </span>
+                  }
                   <button class="button button-xs button-solid rounded-full bg-white text-gray-300">
                     <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-4 min-h-[1lh] shrink-0 align-middle leading-[1em] text-current fill-current" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg>
                   </button>
@@ -133,6 +144,8 @@ import { cn } from "@/utils/classes";
 })
 export class RecipeListComponent implements OnInit {
   private recipeService = inject(RecipeService);
+  private readonly reviewService = inject(ReviewService);
+  protected reviews = signal<Map<string, Review[]>>(new Map());
   protected readonly cn = cn;
 
   // Signal for loading state
@@ -167,11 +180,37 @@ export class RecipeListComponent implements OnInit {
       next: (recipes) => {
         console.log("✅ Recipes loaded:", recipes);
         this.recipes.set(recipes);
-        this.loading.set(false);
+        this.loadReviews(recipes);
       },
       error: (err) => {
         console.error("❌ Error loading recipes:", err);
         this.error.set(err.message);
+        this.loading.set(false);
+      },
+    });
+  }
+
+  private loadReviews(recipes: Recipe[]) {
+    // Create an array of observables for all review requests
+    const reviewObservables = recipes.map((recipe) => this.reviewService.getReviewsByRecipeId(recipe.id));
+
+    // Use forkJoin to wait for all requests to complete
+    forkJoin(reviewObservables).subscribe({
+      next: (reviewsArray) => {
+        const reviewsMap = new Map<string, Review[]>();
+
+        // Map each review array to its recipe ID
+        recipes.forEach((recipe, index) => {
+          reviewsMap.set(recipe.id, reviewsArray[index]);
+          console.log("✅ Reviews loaded:", reviewsArray[index].length, "for:", recipe.id);
+        });
+
+        this.reviews.set(reviewsMap);
+        this.loading.set(false);
+        console.log("✅ All reviews loaded successfully");
+      },
+      error: (error: Error) => {
+        console.error("❌ Failed to load reviews:", error);
         this.loading.set(false);
       },
     });
