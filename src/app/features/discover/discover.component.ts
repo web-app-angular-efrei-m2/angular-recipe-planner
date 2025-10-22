@@ -2,8 +2,10 @@ import { Component, inject, type OnInit, signal } from "@angular/core";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 import { DomSanitizer } from "@angular/platform-browser";
 import { Router } from "@angular/router";
+import { Store } from "@ngrx/store";
 import { CATEGORY_GROUPS } from "@/app/core/config/categories.config";
-import { type Recipe, RecipeService } from "@/app/core/services/recipe.service";
+import { loadRecipes } from "@/app/core/state/recipes/recipes.actions";
+import { selectAllRecipes, selectRecipesLoading } from "@/app/core/state/recipes/recipes.selectors";
 
 /**
  * ENHANCED DISCOVER COMPONENT WITH HIERARCHICAL CATEGORIES
@@ -131,18 +133,17 @@ import { type Recipe, RecipeService } from "@/app/core/services/recipe.service";
   `,
 })
 export class DiscoverComponent implements OnInit {
-  private recipeService = inject(RecipeService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
   private sanitizer = inject(DomSanitizer);
+  private readonly store = inject(Store);
 
   // Category configuration
   protected categoryGroups = CATEGORY_GROUPS;
 
-  // State
-  protected recipes = signal<Recipe[]>([]);
-  protected loading = signal<boolean>(false);
-  protected expandedCategories = signal<Set<string>>(new Set());
+  // Select data from NgRx store
+  protected recipes = this.store.selectSignal(selectAllRecipes);
+  protected loading = this.store.selectSignal(selectRecipesLoading);
 
   // Popular chefs (mock data)
   protected popularChefs = signal([
@@ -158,24 +159,8 @@ export class DiscoverComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.loadRecipes();
-  }
-
-  /**
-   * Load all recipes
-   */
-  private loadRecipes(): void {
-    this.loading.set(true);
-    this.recipeService.getRecipes().subscribe({
-      next: (recipes) => {
-        this.recipes.set(recipes);
-        this.loading.set(false);
-      },
-      error: (err) => {
-        console.error("❌ Error loading recipes:", err);
-        this.loading.set(false);
-      },
-    });
+    // Dispatch action to load recipes from the store
+    this.store.dispatch(loadRecipes());
   }
 
   /**

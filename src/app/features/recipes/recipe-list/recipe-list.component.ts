@@ -1,11 +1,14 @@
 import { Component, computed, inject, type OnInit, signal } from "@angular/core";
 import { DomSanitizer } from "@angular/platform-browser";
 import { RouterLink } from "@angular/router";
+import { Store } from "@ngrx/store";
 import { forkJoin } from "rxjs";
 import { CATEGORY_GROUPS } from "@/app/core/config/categories.config";
-import { type Recipe, RecipeService } from "@/app/core/services/recipe.service";
+import type { Recipe } from "@/app/core/services/recipe.service";
 import type { Review } from "@/app/core/services/review.service";
 import { ReviewService } from "@/app/core/services/review.service";
+import { loadRecipes } from "@/app/core/state/recipes/recipes.actions";
+import { selectAllRecipes, selectRecipesError, selectRecipesLoading } from "@/app/core/state/recipes/recipes.selectors";
 import { DifficultyLevelPipe } from "@/app/shared/pipes/difficulty-level.pipe";
 import { RatingPipe } from "@/app/shared/pipes/rating.pipe";
 import { cn } from "@/utils/classes";
@@ -152,21 +155,18 @@ import { cn } from "@/utils/classes";
   `,
 })
 export class RecipeListComponent implements OnInit {
-  private recipeService = inject(RecipeService);
   private readonly reviewService = inject(ReviewService);
-  protected reviews = signal<Map<string, Review[]>>(new Map());
+  private readonly store = inject(Store);
   private sanitizer = inject(DomSanitizer);
 
   protected readonly cn = cn;
 
-  // Signal for loading state
-  protected loading = signal<boolean>(false);
+  protected reviews = signal<Map<string, Review[]>>(new Map());
 
-  // Signal for recipes data
-  protected recipes = signal<Recipe[]>([]);
-
-  // Signal for error state
-  protected error = signal<string | null>(null);
+  // Select data from NgRx store
+  protected recipes = this.store.selectSignal(selectAllRecipes);
+  protected loading = this.store.selectSignal(selectRecipesLoading);
+  protected error = this.store.selectSignal(selectRecipesError);
 
   // Category configuration
   protected categoryGroups = CATEGORY_GROUPS;
@@ -194,54 +194,44 @@ export class RecipeListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.loadRecipes();
+    // Dispatch action to load recipes from the store
+    this.store.dispatch(loadRecipes());
+    this.loadReviews();
   }
 
   /**
-   * Load recipes from the API
+   * Load reviews for all recipes
    */
-  private loadRecipes(): void {
-    // Set loading to true
-    this.loading.set(true);
-    this.error.set(null);
+  private loadReviews(): void {
+    // Subscribe to recipes from store
+    const recipesSubscription = this.store.select(selectAllRecipes).subscribe((recipes) => {
+      if (recipes.length === 0) {
+        return;
+      }
 
-    this.recipeService.getRecipes().subscribe({
-      next: (recipes) => {
-        console.log("✅ Recipes loaded:", recipes);
-        this.recipes.set(recipes);
-        this.loadReviews(recipes);
-      },
-      error: (err) => {
-        console.error("❌ Error loading recipes:", err);
-        this.error.set(err.message);
-        this.loading.set(false);
-      },
-    });
-  }
+      // Create an array of observables for all review requests
+      const reviewObservables = recipes.map((recipe) => this.reviewService.getReviewsByRecipeId(recipe.id));
 
-  private loadReviews(recipes: Recipe[]) {
-    // Create an array of observables for all review requests
-    const reviewObservables = recipes.map((recipe) => this.reviewService.getReviewsByRecipeId(recipe.id));
+      // Use forkJoin to wait for all requests to complete
+      forkJoin(reviewObservables).subscribe({
+        next: (reviewsArray) => {
+          const reviewsMap = new Map<string, Review[]>();
 
-    // Use forkJoin to wait for all requests to complete
-    forkJoin(reviewObservables).subscribe({
-      next: (reviewsArray) => {
-        const reviewsMap = new Map<string, Review[]>();
+          // Map each review array to its recipe ID
+          recipes.forEach((recipe, index) => {
+            reviewsMap.set(recipe.id, reviewsArray[index]);
+          });
 
-        // Map each review array to its recipe ID
-        recipes.forEach((recipe, index) => {
-          reviewsMap.set(recipe.id, reviewsArray[index]);
-          console.log("✅ Reviews loaded:", reviewsArray[index].length, "for:", recipe.id);
-        });
+          this.reviews.set(reviewsMap);
+          console.log("✅ All reviews loaded successfully");
+        },
+        error: (error: Error) => {
+          console.error("❌ Failed to load reviews:", error);
+        },
+      });
 
-        this.reviews.set(reviewsMap);
-        this.loading.set(false);
-        console.log("✅ All reviews loaded successfully");
-      },
-      error: (error: Error) => {
-        console.error("❌ Failed to load reviews:", error);
-        this.loading.set(false);
-      },
+      // Unsubscribe after first emission
+      recipesSubscription.unsubscribe();
     });
   }
 
