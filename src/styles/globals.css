@@ -131,7 +131,7 @@
   /* ACCORDION COMPONENT STYLES */
   .accordion {
     &::details-content {
-      @apply transition-all transition-discrete duration-300 ease-in-out overflow-hidden h-full max-h-0;
+      @apply transition-all transition-discrete duration-300 ease-in-out overflow-hidden max-h-0;
     }
     &[open]::details-content {
       @apply max-h-[var(--height)];

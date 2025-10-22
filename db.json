@@ -210,6 +210,56 @@
       "updatedAt": 1729350800000
     }
   ],
+  "reviews": [
+    {
+      "id": "1",
+      "recipeId": "1",
+      "authorId": "d063",
+      "rating": 5,
+      "comment": "Absolutely delicious! The creamy sauce was perfect. I followed the recipe exactly and it turned out amazing. My family loved it!",
+      "createdAt": 1729360000000
+    },
+    {
+      "id": "2",
+      "recipeId": "1",
+      "authorId": "d243",
+      "rating": 4,
+      "comment": "Great recipe! I added a bit more pepper for extra kick. Cooking time was spot on.",
+      "createdAt": 1729370000000
+    },
+    {
+      "id": "3",
+      "recipeId": "2",
+      "authorId": "d063",
+      "rating": 5,
+      "comment": "Best Chicken Tikka Masala I've ever made! The marination really makes a difference. Will definitely make again.",
+      "createdAt": 1729380000000
+    },
+    {
+      "id": "bff2",
+      "authorId": "d063",
+      "recipeId": "1",
+      "rating": 3,
+      "comment": "Well done Mr. Diaz!",
+      "createdAt": 1761077240309
+    },
+    {
+      "id": "e6c6",
+      "authorId": "d063",
+      "recipeId": "sfdxgcfgvhhjbkfygtdfrchgvujbukj",
+      "rating": 2,
+      "comment": "dxcgfhgvjhbknl,njbhv",
+      "createdAt": 1761078949735
+    },
+    {
+      "id": "0ecf",
+      "authorId": "d063",
+      "recipeId": "sfdxgcfgvhhjbkfygtdfrchgvujbukj",
+      "rating": 3,
+      "comment": "dgfhcvjhb rdftguhjkl yughij,",
+      "createdAt": 1761118706268
+    }
+  ],
   "ingredients": [],
   "mealPlans": [],
   "shoppingLists": []
