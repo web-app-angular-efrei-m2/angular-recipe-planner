@@ -210,17 +210,19 @@ export const selectPopularRecipes = createSelector(selectAllRecipes, selectRevie
 
 /**
  * Select trending recipes (recently created recipes with good engagement)
- * A recipe is trending if it was created in the last 30 days and has 2+ reviews
+ * A recipe is trending if it was created in the last 365 days and has 2+ reviews
  */
 export const selectTrendingRecipes = createSelector(selectAllRecipes, selectReviewsByRecipeMap, (recipes, reviewsMap) => {
-  const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-
   return recipes.filter((recipe) => {
     const reviews = reviewsMap.get(recipe.id);
-    const isRecent = recipe.createdAt >= thirtyDaysAgo;
-    const hasEngagement = reviews && reviews.length >= 2;
 
-    return isRecent && hasEngagement;
+    if (reviews && reviews.length > 0) {
+      const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+      const isRecent = recipe.createdAt >= oneWeekAgo;
+      const hasEngagement = reviews && reviews.length >= 2;
+      return isRecent && hasEngagement;
+    }
+    return false;
   });
 });
 

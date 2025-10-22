@@ -1,12 +1,14 @@
-import { Component, computed, inject, type OnInit, signal } from "@angular/core";
+import { Component, computed, effect, inject, type OnDestroy, type OnInit, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
-import { forkJoin } from "rxjs";
-import { type Recipe, RecipeService } from "@/app/core/services/recipe.service";
-import { type Review, ReviewService } from "@/app/core/services/review.service";
+import { Store } from "@ngrx/store";
+import { loadRecipes } from "@/app/core/state/recipes/recipes.actions";
+import { selectAllRecipes, selectPopularRecipes, selectRecipesLoading, selectTrendingRecipes } from "@/app/core/state/recipes/recipes.selectors";
+import { loadReviewsByRecipeId } from "@/app/core/state/reviews/reviews.actions";
+import { selectAreReviewsLoadedForRecipe, selectReviewsByRecipeMap } from "@/app/core/state/reviews/reviews.selectors";
 import { DifficultyLevelPipe } from "@/app/shared/pipes/difficulty-level.pipe";
+import { RatingPipe } from "@/app/shared/pipes/rating.pipe";
 import { cn } from "@/utils/classes";
-import { RatingPipe } from "../../shared/pipes/rating.pipe";
 
 @Component({
   selector: "app-discover-results",
@@ -119,12 +121,33 @@ import { RatingPipe } from "../../shared/pipes/rating.pipe";
       } @if (!loading() && filteredRecipes().length > 0) {
       <div class="flex-1 flex flex-col px-6 py-2 overflow-hidden">
         <!-- Results Summary -->
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="text-sm text-gray-800 font-semibold">
-            Found
-            <span class="text-purple-500">{{ filteredRecipes().length }}</span>
-            recipes
-          </h3>
+        <div class="flex flex-col gap-2 mb-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm text-gray-800 font-semibold">
+              Found
+              <span class="text-purple-500">{{ filteredRecipes().length }}</span>
+              recipes
+            </h3>
+          </div>
+
+          <!-- Active Filter Display -->
+          @if (filterDisplayText()) {
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center rounded-xl tabular-nums whitespace-nowrap select-none px-3 py-1 text-sm bg-purple-100 text-purple-700">
+                {{ filterDisplayText() }}
+                <button
+                  (click)="clearSearch()"
+                  class="ml-2 hover:text-purple-900"
+                  aria-label="Clear filter"
+                >
+                  <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="inline-block size-4">
+                    <path d="M18 6 6 18"></path>
+                    <path d="m6 6 12 12"></path>
+                  </svg>
+                </button>
+              </span>
+            </div>
+          }
         </div>
         <!-- Recipe Results Grid -->
         <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 overflow-scroll snap-y snap-mandatory">
@@ -271,26 +294,43 @@ import { RatingPipe } from "../../shared/pipes/rating.pipe";
     </div>
   `,
 })
-export class DiscoverResultsComponent implements OnInit {
-  private recipeService = inject(RecipeService);
-  private readonly reviewService = inject(ReviewService);
+export class DiscoverResultsComponent implements OnInit, OnDestroy {
+  private readonly store = inject(Store);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
   protected readonly cn = cn;
 
-  // Signals for state management
-  protected recipes = signal<Recipe[]>([]);
-  protected loading = signal<boolean>(false);
+  // Select data from NgRx store
+  protected recipes = this.store.selectSignal(selectAllRecipes);
+  protected loading = this.store.selectSignal(selectRecipesLoading);
+  protected reviews = this.store.selectSignal(selectReviewsByRecipeMap);
+  protected trendingRecipes = this.store.selectSignal(selectTrendingRecipes);
+  protected popularRecipes = this.store.selectSignal(selectPopularRecipes);
 
   // Filter signals
   protected searchQuery = signal<string>("");
-
-  protected reviews = signal<Map<string, Review[]>>(new Map());
+  protected filterKey = signal<string>("");
+  protected filterValue = signal<string>("");
 
   // Computed signal for filtered recipes
   protected filteredRecipes = computed(() => {
     let filtered = this.recipes();
+
+    // Special handling for trending/popular filters BEFORE other filters
+    const key = this.filterKey();
+    const value = this.filterValue();
+
+    // For trending/popular filters, we need reviews to be loaded
+    // Only apply these filters if we have reviews data
+    const reviewsMap = this.reviews();
+    const hasReviews = reviewsMap.size > 0;
+
+    if (key === "isTrending" && value === "true" && hasReviews) {
+      filtered = this.trendingRecipes();
+    } else if (key === "isPopular" && value === "true" && hasReviews) {
+      filtered = this.popularRecipes();
+    }
 
     // Filter by search query
     const query = this.searchQuery().toLowerCase().trim();
@@ -303,67 +343,150 @@ export class DiscoverResultsComponent implements OnInit {
           recipe.ingredients.some((ingredient) => ingredient.toLowerCase().includes(query)),
       );
     }
+
+    // Filter by URL params (filter and value) - skip if already handled trending/popular
+    if (key && value && value !== "all" && key !== "isTrending" && key !== "isPopular") {
+      filtered = filtered.filter((recipe) => {
+        // Special case: totalTime with range values
+        if (key === "totalTime") {
+          const totalTime = recipe.prepTime + recipe.cookTime;
+
+          if (value === "<30") {
+            return totalTime < 30;
+          }
+          if (value === "30-60") {
+            return totalTime >= 30 && totalTime <= 60;
+          }
+          if (value === ">60") {
+            return totalTime > 60;
+          }
+
+          return false;
+        }
+
+        const recipeValue = recipe[key as keyof typeof recipe];
+
+        // Handle different types of properties
+        if (Array.isArray(recipeValue)) {
+          // For array properties like dietaryTags, mealType
+          return recipeValue.includes(value);
+        }
+        if (typeof recipeValue === "string") {
+          // For string properties like cuisine, category
+          return recipeValue.toLowerCase() === value.toLowerCase();
+        }
+        if (typeof recipeValue === "number") {
+          // For number properties like spiceLevel
+          return recipeValue === Number(value);
+        }
+
+        return false;
+      });
+    }
+
     return filtered;
   });
 
+  // Computed signal for filter display text
+  protected filterDisplayText = computed(() => {
+    const key = this.filterKey();
+    const value = this.filterValue();
+
+    if (!key || !value || value === "all") {
+      return "";
+    }
+
+    // Format filter key for display
+    const keyMap: Record<string, string> = {
+      cuisine: "Cuisine",
+      dietaryTags: "Dietary",
+      mealType: "Meal Type",
+      category: "Category",
+      spiceLevel: "Spice Level",
+      totalTime: "Cooking Time",
+      isTrending: "Filter",
+      isPopular: "Filter",
+    };
+
+    // Format filter value for display
+    let displayValue = "";
+
+    if (key === "totalTime") {
+      const timeMap: Record<string, string> = {
+        "<30": "Quick (<30 min)",
+        "30-60": "Medium (30-60 min)",
+        ">60": "Long (60+ min)",
+      };
+      displayValue = timeMap[value] || value;
+    } else if (key === "spiceLevel") {
+      const spiceMap: Record<string, string> = {
+        "0": "Not Spicy",
+        "1": "Mild",
+        "2": "Medium",
+        "3": "Spicy",
+      };
+      displayValue = spiceMap[value] || value;
+    } else if (key === "isTrending") {
+      displayValue = "Trending Now";
+    } else if (key === "isPopular") {
+      displayValue = "Most Popular";
+    } else {
+      // Capitalize first letter and replace hyphens with spaces
+      displayValue = value
+        .split("-")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+    }
+
+    const displayKey = keyMap[key] || key;
+
+    return `${displayKey}: ${displayValue}`;
+  });
+
+  // Effect to load reviews for filtered recipes
+  private loadReviewsEffect = effect(() => {
+    const allRecipes = this.recipes();
+
+    // Load reviews for all recipes so we can calculate popularity
+    for (const recipe of allRecipes) {
+      // Check if reviews for this recipe are already loaded
+      const areLoaded = this.store.selectSignal(selectAreReviewsLoadedForRecipe(recipe.id))();
+
+      if (!areLoaded) {
+        this.store.dispatch(loadReviewsByRecipeId({ recipeId: recipe.id }));
+      }
+    }
+  });
+
   ngOnInit(): void {
-    this.loadRecipes();
+    // Dispatch action to load recipes from the store
+    this.store.dispatch(loadRecipes());
 
     // Get query params from URL
     this.route.queryParams.subscribe((params) => {
+      // Handle search query (q parameter)
       if (params["q"]) {
         this.searchQuery.set(params["q"]);
       }
+
+      // Handle tag search (legacy parameter)
       if (params["tag"]) {
         this.searchQuery.set(params["tag"]);
+      }
+
+      // Handle filter parameters (filter and value)
+      if (params["filter"]) {
+        this.filterKey.set(params["filter"]);
+      }
+      if (params["value"]) {
+        this.filterValue.set(params["value"]);
       }
     });
   }
 
-  /**
-   * Load all recipes from the API
-   */
-  private loadRecipes(): void {
-    // Set loading to true
-    this.loading.set(true);
-
-    this.recipeService.getRecipes().subscribe({
-      next: (recipes) => {
-        console.log("✅ Recipes loaded:", recipes);
-        this.recipes.set(recipes);
-        this.loadReviews(recipes);
-      },
-      error: (err) => {
-        console.error("❌ Error loading recipes:", err);
-        this.loading.set(false);
-      },
-    });
-  }
-
-  private loadReviews(recipes: Recipe[]) {
-    // Create an array of observables for all review requests
-    const reviewObservables = recipes.map((recipe) => this.reviewService.getReviewsByRecipeId(recipe.id));
-
-    // Use forkJoin to wait for all requests to complete
-    forkJoin(reviewObservables).subscribe({
-      next: (reviewsArray) => {
-        const reviewsMap = new Map<string, Review[]>();
-
-        // Map each review array to its recipe ID
-        recipes.forEach((recipe, index) => {
-          reviewsMap.set(recipe.id, reviewsArray[index]);
-          console.log("✅ Reviews loaded:", reviewsArray[index].length, "for:", recipe.id);
-        });
-
-        this.reviews.set(reviewsMap);
-        this.loading.set(false);
-        console.log("✅ All reviews loaded successfully");
-      },
-      error: (error: Error) => {
-        console.error("❌ Failed to load reviews:", error);
-        this.loading.set(false);
-      },
-    });
+  ngOnDestroy(): void {
+    // Cleanup if necessary
+    this.loadReviewsEffect.destroy();
   }
 
   /**
@@ -371,13 +494,26 @@ export class DiscoverResultsComponent implements OnInit {
    */
   protected onSearchChange(): void {
     console.log("🔍 Search query:", this.searchQuery());
+    // Update URL with search query
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { q: this.searchQuery() || null },
+      queryParamsHandling: "merge",
+    });
   }
 
   /**
-   * Clear search input
+   * Clear search input and filters
    */
   protected clearSearch(): void {
     this.searchQuery.set("");
+    this.filterKey.set("");
+    this.filterValue.set("");
+    // Clear URL params
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {},
+    });
   }
 
   /**

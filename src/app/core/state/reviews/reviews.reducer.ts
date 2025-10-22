@@ -85,6 +85,7 @@ export const reviewsReducer = createReducer(
     const newReviewsByRecipe = new Map(state.reviewsByRecipe);
     const newReviewsById = new Map(state.reviewsById);
     const newLoadedRecipeIds = new Set(state.loadedRecipeIds);
+    const newRatingStatsByRecipe = new Map(state.ratingStatsByRecipe);
 
     // Store reviews for this recipe
     newReviewsByRecipe.set(recipeId, reviews);
@@ -94,6 +95,22 @@ export const reviewsReducer = createReducer(
       newReviewsById.set(review.id, review);
     });
 
+    // Calculate and store rating statistics
+    if (reviews.length > 0) {
+      const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+      const average = totalRating / reviews.length;
+      newRatingStatsByRecipe.set(recipeId, {
+        average,
+        count: reviews.length,
+      });
+    } else {
+      // No reviews, set default stats
+      newRatingStatsByRecipe.set(recipeId, {
+        average: 0,
+        count: 0,
+      });
+    }
+
     // Mark this recipe as loaded
     newLoadedRecipeIds.add(recipeId);
 
@@ -101,6 +118,7 @@ export const reviewsReducer = createReducer(
       ...state,
       reviewsByRecipe: newReviewsByRecipe,
       reviewsById: newReviewsById,
+      ratingStatsByRecipe: newRatingStatsByRecipe,
       loadedRecipeIds: newLoadedRecipeIds,
       loading: false,
       error: null,

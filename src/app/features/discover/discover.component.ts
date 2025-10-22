@@ -1,11 +1,13 @@
-import { Component, inject, type OnInit, signal } from "@angular/core";
+import { Component, effect, inject, type OnDestroy, type OnInit, signal } from "@angular/core";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 import { DomSanitizer } from "@angular/platform-browser";
 import { Router } from "@angular/router";
 import { Store } from "@ngrx/store";
 import { CATEGORY_GROUPS } from "@/app/core/config/categories.config";
 import { loadRecipes } from "@/app/core/state/recipes/recipes.actions";
-import { selectAllRecipes, selectRecipesLoading } from "@/app/core/state/recipes/recipes.selectors";
+import { selectAllRecipes, selectPopularRecipes, selectRecipesLoading, selectTrendingRecipes } from "@/app/core/state/recipes/recipes.selectors";
+import { loadReviewsByRecipeId } from "@/app/core/state/reviews/reviews.actions";
+import { selectAreReviewsLoadedForRecipe } from "@/app/core/state/reviews/reviews.selectors";
 
 /**
  * ENHANCED DISCOVER COMPONENT WITH HIERARCHICAL CATEGORIES
@@ -91,16 +93,18 @@ import { selectAllRecipes, selectRecipesLoading } from "@/app/core/state/recipes
             <div class="px-4 pb-2">
               <ul class="flex flex-col h-full max-h-[200px] overflow-auto snap-y snap-mandatory">
                 @for (subcategory of group.subcategories; track subcategory.id) {
-                  <li class="inline-flex whitespace-normal text-sm ml-10 border-t first:border-t-0 snap-start">
-                    <button
-                      (click)="navigateToFilter(subcategory)"
-                      class="button button-lg button-ghost justify-start text-sm font-semibold rounded-none w-full">
-                      {{ subcategory.name }}
-                      @if (getRecipeCount(subcategory); as count) {
-                        <span class="text-xs text-gray-400 ml-auto">({{ count }})</span>
-                      }
-                    </button>
-                  </li>
+                  @if (getRecipeCount(subcategory) > 0) {
+                    <li class="inline-flex whitespace-normal text-sm ml-10 border-t first:border-t-0 snap-start">
+                      <button
+                        (click)="navigateToFilter(subcategory)"
+                        class="button button-lg button-ghost justify-start text-sm font-semibold rounded-none w-full">
+                        {{ subcategory.name }}
+                        @if (getRecipeCount(subcategory); as count) {
+                          <span class="text-xs text-gray-400 ml-auto">({{ count }})</span>
+                        }
+                      </button>
+                    </li>
+                  }
                 }
               </ul>
             </div>
@@ -132,7 +136,7 @@ import { selectAllRecipes, selectRecipesLoading } from "@/app/core/state/recipes
     </div>
   `,
 })
-export class DiscoverComponent implements OnInit {
+export class DiscoverComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private fb = inject(FormBuilder);
   private sanitizer = inject(DomSanitizer);
@@ -144,6 +148,9 @@ export class DiscoverComponent implements OnInit {
   // Select data from NgRx store
   protected recipes = this.store.selectSignal(selectAllRecipes);
   protected loading = this.store.selectSignal(selectRecipesLoading);
+
+  protected trendingRecipes = this.store.selectSignal(selectTrendingRecipes);
+  protected popularRecipes = this.store.selectSignal(selectPopularRecipes);
 
   // Popular chefs (mock data)
   protected popularChefs = signal([
@@ -158,9 +165,29 @@ export class DiscoverComponent implements OnInit {
     query: ["", [Validators.required]],
   });
 
+  // Effect to load reviews for filtered recipes
+  private loadReviewsEffect = effect(() => {
+    const allRecipes = this.recipes();
+
+    // Load reviews for all recipes so we can calculate popularity
+    for (const recipe of allRecipes) {
+      // Check if reviews for this recipe are already loaded
+      const areLoaded = this.store.selectSignal(selectAreReviewsLoadedForRecipe(recipe.id))();
+
+      if (!areLoaded) {
+        this.store.dispatch(loadReviewsByRecipeId({ recipeId: recipe.id }));
+      }
+    }
+  });
+
   ngOnInit(): void {
     // Dispatch action to load recipes from the store
     this.store.dispatch(loadRecipes());
+  }
+
+  ngOnDestroy(): void {
+    // Cleanup if necessary
+    this.loadReviewsEffect.destroy();
   }
 
   /**
@@ -168,6 +195,22 @@ export class DiscoverComponent implements OnInit {
    */
   protected getRecipeCount(subcategory: { filterKey: string; filterValue: string }): number {
     const allRecipes = this.recipes();
+
+    // Handle "all" value - return total recipe count
+    if (subcategory.filterValue === "all") {
+      return allRecipes.length;
+    }
+
+    // Handle trending filter
+    if (subcategory.filterKey === "isTrending") {
+      return this.trendingRecipes().length;
+    }
+
+    // Handle popular filter
+    if (subcategory.filterKey === "isPopular") {
+      return this.popularRecipes().length;
+    }
+
     return allRecipes.filter((recipe) => {
       // Access recipe properties dynamically
       const recipeData = recipe as unknown as Record<string, unknown>;

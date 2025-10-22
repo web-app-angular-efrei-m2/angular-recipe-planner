@@ -32,7 +32,7 @@
       "prepTime": 10,
       "cookTime": 20,
       "servings": 4,
-      "category": "Italian",
+      "category": "Main Course",
       "cuisine": "Italian",
       "dietaryTags": [],
       "mealType": [
@@ -42,8 +42,8 @@
       "spiceLevel": 0,
       "calories": 520,
       "protein": 24,
-      "createdAt": 1729350000000,
-      "updatedAt": 1729350000000
+      "createdAt": 1760612800000,
+      "updatedAt": 1760612800000
     },
     {
       "id": "2",
@@ -63,7 +63,7 @@
       "prepTime": 130,
       "cookTime": 30,
       "servings": 6,
-      "category": "Indian",
+      "category": "Main Course",
       "cuisine": "Indian",
       "dietaryTags": [
         "gluten-free"
@@ -75,8 +75,8 @@
       "spiceLevel": 2,
       "calories": 380,
       "protein": 32,
-      "createdAt": 1729350100000,
-      "updatedAt": 1729350100000
+      "createdAt": 1760617200000,
+      "updatedAt": 1760617200000
     },
     {
       "id": "3",
@@ -93,7 +93,7 @@
       "prepTime": 15,
       "cookTime": 0,
       "servings": 4,
-      "category": "Salad",
+      "category": "Appetizer",
       "cuisine": "American",
       "dietaryTags": [
         "vegetarian"
@@ -104,8 +104,8 @@
       "spiceLevel": 0,
       "calories": 220,
       "protein": 8,
-      "createdAt": 1729350200000,
-      "updatedAt": 1729350200000
+      "createdAt": 1760611600000,
+      "updatedAt": 1760611600000
     },
     {
       "id": "4",
@@ -125,7 +125,7 @@
       "prepTime": 20,
       "cookTime": 15,
       "servings": 6,
-      "category": "Mexican",
+      "category": "Main Course",
       "cuisine": "Mexican",
       "dietaryTags": [
         "gluten-free",
@@ -138,8 +138,8 @@
       "spiceLevel": 2,
       "calories": 340,
       "protein": 26,
-      "createdAt": 1729350300000,
-      "updatedAt": 1729350300000
+      "createdAt": 1760616000000,
+      "updatedAt": 1760616000000
     },
     {
       "id": "5",
@@ -160,9 +160,20 @@
       "prepTime": 20,
       "cookTime": 10,
       "servings": 4,
-      "category": "Thai",
-      "createdAt": 1729350400000,
-      "updatedAt": 1729350400000
+      "category": "Main Course",
+      "cuisine": "Thai",
+      "dietaryTags": [
+        "gluten-free"
+      ],
+      "mealType": [
+        "lunch",
+        "dinner"
+      ],
+      "spiceLevel": 2,
+      "calories": 580,
+      "protein": 36,
+      "createdAt": 1760610400000,
+      "updatedAt": 1760610400000
     },
     {
       "id": "6",
@@ -181,9 +192,20 @@
       "prepTime": 15,
       "cookTime": 15,
       "servings": 4,
-      "category": "American",
-      "createdAt": 1729350500000,
-      "updatedAt": 1729350500000
+      "category": "Main Course",
+      "cuisine": "American",
+      "dietaryTags": [
+        "gluten-free"
+      ],
+      "mealType": [
+        "lunch",
+        "dinner"
+      ],
+      "spiceLevel": 2,
+      "calories": 580,
+      "protein": 36,
+      "createdAt": 1760614800000,
+      "updatedAt": 1760614800000
     },
     {
       "id": "7",
@@ -204,9 +226,20 @@
       "prepTime": 30,
       "cookTime": 20,
       "servings": 4,
-      "category": "Japanese",
-      "createdAt": 1729350600000,
-      "updatedAt": 1729350600000
+      "category": "Main Course",
+      "cuisine": "Japanese",
+      "dietaryTags": [
+        "gluten-free"
+      ],
+      "mealType": [
+        "lunch",
+        "dinner"
+      ],
+      "spiceLevel": 2,
+      "calories": 580,
+      "protein": 36,
+      "createdAt": 1760619200000,
+      "updatedAt": 1760619200000
     },
     {
       "id": "8",
@@ -227,8 +260,18 @@
       "cookTime": 12,
       "servings": 4,
       "category": "Dessert",
-      "createdAt": 1729350700000,
-      "updatedAt": 1729350700000
+      "cuisine": "French",
+      "dietaryTags": [
+        "vegetarian"
+      ],
+      "mealType": [
+        "dessert"
+      ],
+      "spiceLevel": 0,
+      "calories": 450,
+      "protein": 6,
+      "createdAt": 1729713600000,
+      "updatedAt": 1729713600000
     },
     {
       "id": "9",
@@ -248,8 +291,18 @@
       "cookTime": 10,
       "servings": 2,
       "category": "Breakfast",
-      "createdAt": 1729350800000,
-      "updatedAt": 1729350800000
+      "cuisine": "American",
+      "dietaryTags": [
+        "vegetarian"
+      ],
+      "mealType": [
+        "breakfast"
+      ],
+      "spiceLevel": 0,
+      "calories": 350,
+      "protein": 8,
+      "createdAt": 1729728000000,
+      "updatedAt": 1729728000000
     },
     {
       "id": "10",
@@ -271,9 +324,20 @@
       "prepTime": 40,
       "cookTime": 60,
       "servings": 8,
-      "category": "Greek",
-      "createdAt": 1729350900000,
-      "updatedAt": 1729350900000
+      "category": "Main Course",
+      "cuisine": "Greek",
+      "dietaryTags": [
+        "gluten-free"
+      ],
+      "mealType": [
+        "lunch",
+        "dinner"
+      ],
+      "spiceLevel": 2,
+      "calories": 580,
+      "protein": 36,
+      "createdAt": 1760610000000,
+      "updatedAt": 1760610000000
     },
     {
       "id": "11",
@@ -295,9 +359,20 @@
       "prepTime": 30,
       "cookTime": 480,
       "servings": 6,
-      "category": "Vietnamese",
-      "createdAt": 1729351000000,
-      "updatedAt": 1729351000000
+      "category": "Soup",
+      "cuisine": "Vietnamese",
+      "dietaryTags": [
+        "gluten-free"
+      ],
+      "mealType": [
+        "lunch",
+        "dinner"
+      ],
+      "spiceLevel": 2,
+      "calories": 580,
+      "protein": 36,
+      "createdAt": 1760614400000,
+      "updatedAt": 1760614400000
     },
     {
       "id": "12",
@@ -318,9 +393,20 @@
       "prepTime": 15,
       "cookTime": 25,
       "servings": 4,
-      "category": "Healthy",
-      "createdAt": 1729351100000,
-      "updatedAt": 1729351100000
+      "category": "Salad",
+      "cuisine": "Mediterranean",
+      "dietaryTags": [
+        "vegan"
+      ],
+      "mealType": [
+        "lunch",
+        "dinner"
+      ],
+      "spiceLevel": 1,
+      "calories": 400,
+      "protein": 12,
+      "createdAt": 1760618800000,
+      "updatedAt": 1760618800000
     },
     {
       "id": "13",
@@ -340,9 +426,20 @@
       "prepTime": 20,
       "cookTime": 90,
       "servings": 6,
-      "category": "French",
-      "createdAt": 1729351200000,
-      "updatedAt": 1729351200000
+      "category": "Main Course",
+      "cuisine": "French",
+      "dietaryTags": [
+        "gluten-free"
+      ],
+      "mealType": [
+        "lunch",
+        "dinner"
+      ],
+      "spiceLevel": 0,
+      "calories": 450,
+      "protein": 20,
+      "createdAt": 1760613200000,
+      "updatedAt": 1760613200000
     },
     {
       "id": "14",
@@ -363,9 +460,18 @@
       "prepTime": 30,
       "cookTime": 20,
       "servings": 4,
-      "category": "Korean",
-      "createdAt": 1729351300000,
-      "updatedAt": 1729351300000
+      "category": "Main Course",
+      "cuisine": "Korean",
+      "dietaryTags": [],
+      "mealType": [
+        "lunch",
+        "dinner"
+      ],
+      "spiceLevel": 2,
+      "calories": 600,
+      "protein": 30,
+      "createdAt": 1760617600000,
+      "updatedAt": 1760617600000
     },
     {
       "id": "15",
@@ -384,9 +490,20 @@
       "prepTime": 90,
       "cookTime": 10,
       "servings": 2,
-      "category": "Italian",
-      "createdAt": 1729351400000,
-      "updatedAt": 1729351400000
+      "category": "Main Course",
+      "cuisine": "Italian",
+      "dietaryTags": [
+        "vegetarian"
+      ],
+      "mealType": [
+        "lunch",
+        "dinner"
+      ],
+      "spiceLevel": 0,
+      "calories": 700,
+      "protein": 28,
+      "createdAt": 1760612000000,
+      "updatedAt": 1760612000000
     },
     {
       "id": "16",
@@ -406,9 +523,18 @@
       "prepTime": 45,
       "cookTime": 45,
       "servings": 6,
-      "category": "French",
-      "createdAt": 1729351500000,
-      "updatedAt": 1729351500000
+      "category": "Main Course",
+      "cuisine": "French",
+      "dietaryTags": [],
+      "mealType": [
+        "lunch",
+        "dinner"
+      ],
+      "spiceLevel": 0,
+      "calories": 850,
+      "protein": 50,
+      "createdAt": 1729706400000,
+      "updatedAt": 1729706400000
     },
     {
       "id": "17",
@@ -427,9 +553,19 @@
       "prepTime": 10,
       "cookTime": 5,
       "servings": 2,
-      "category": "Italian",
-      "createdAt": 1729351600000,
-      "updatedAt": 1729351600000
+      "category": "Main Course",
+      "cuisine": "Italian",
+      "dietaryTags": [
+        "vegetarian"
+      ],
+      "mealType": [
+        "lunch"
+      ],
+      "spiceLevel": 0,
+      "calories": 450,
+      "protein": 20,
+      "createdAt": 1729720800000,
+      "updatedAt": 1729720800000
     },
     {
       "id": "18",
@@ -451,9 +587,18 @@
       "prepTime": 15,
       "cookTime": 15,
       "servings": 4,
-      "category": "Thai",
-      "createdAt": 1729351700000,
-      "updatedAt": 1729351700000
+      "category": "Main Course",
+      "cuisine": "Thai",
+      "dietaryTags": [],
+      "mealType": [
+        "lunch",
+        "dinner"
+      ],
+      "spiceLevel": 2,
+      "calories": 300,
+      "protein": 25,
+      "createdAt": 1729735200000,
+      "updatedAt": 1729735200000
     },
     {
       "id": "19",
@@ -472,9 +617,20 @@
       "prepTime": 20,
       "cookTime": 10,
       "servings": 4,
-      "category": "Middle Eastern",
-      "createdAt": 1729351800000,
-      "updatedAt": 1729351800000
+      "category": "Main Course",
+      "cuisine": "Middle Eastern",
+      "dietaryTags": [
+        "vegan"
+      ],
+      "mealType": [
+        "lunch",
+        "dinner"
+      ],
+      "spiceLevel": 1,
+      "calories": 500,
+      "protein": 18,
+      "createdAt": 1760616400000,
+      "updatedAt": 1760616400000
     },
     {
       "id": "20",
@@ -496,8 +652,16 @@
       "cookTime": 15,
       "servings": 4,
       "category": "Breakfast",
-      "createdAt": 1729351900000,
-      "updatedAt": 1729351900000
+      "cuisine": "American",
+      "dietaryTags": [],
+      "mealType": [
+        "breakfast"
+      ],
+      "spiceLevel": 0,
+      "calories": 350,
+      "protein": 10,
+      "createdAt": 1760610800000,
+      "updatedAt": 1760610800000
     },
     {
       "id": "21",
@@ -517,8 +681,18 @@
       "cookTime": 0,
       "servings": 8,
       "category": "Dessert",
-      "createdAt": 1729352000000,
-      "updatedAt": 1729352000000
+      "cuisine": "Italian",
+      "dietaryTags": [
+        "vegetarian"
+      ],
+      "mealType": [
+        "dessert"
+      ],
+      "spiceLevel": 0,
+      "calories": 450,
+      "protein": 8,
+      "createdAt": 1760615200000,
+      "updatedAt": 1760615200000
     },
     {
       "id": "22",
@@ -539,9 +713,18 @@
       "prepTime": 20,
       "cookTime": 90,
       "servings": 4,
-      "category": "Japanese",
-      "createdAt": 1729352100000,
-      "updatedAt": 1729352100000
+      "category": "Main Course",
+      "cuisine": "Japanese",
+      "dietaryTags": [],
+      "mealType": [
+        "lunch",
+        "dinner"
+      ],
+      "spiceLevel": 1,
+      "calories": 650,
+      "protein": 40,
+      "createdAt": 1760619600000,
+      "updatedAt": 1760619600000
     },
     {
       "id": "23",
@@ -561,9 +744,18 @@
       "prepTime": 20,
       "cookTime": 15,
       "servings": 4,
-      "category": "Mexican",
-      "createdAt": 1729352200000,
-      "updatedAt": 1729352200000
+      "category": "Main Course",
+      "cuisine": "Mexican",
+      "dietaryTags": [],
+      "mealType": [
+        "lunch",
+        "dinner"
+      ],
+      "spiceLevel": 2,
+      "calories": 450,
+      "protein": 30,
+      "createdAt": 1760614000000,
+      "updatedAt": 1760614000000
     },
     {
       "id": "24",
@@ -585,8 +777,19 @@
       "cookTime": 20,
       "servings": 4,
       "category": "Breakfast",
-      "createdAt": 1729352300000,
-      "updatedAt": 1729352300000
+      "cuisine": "Middle Eastern",
+      "dietaryTags": [
+        "vegetarian"
+      ],
+      "mealType": [
+        "breakfast",
+        "brunch"
+      ],
+      "spiceLevel": 1,
+      "calories": 400,
+      "protein": 20,
+      "createdAt": 1760618400000,
+      "updatedAt": 1760618400000
     },
     {
       "id": "25",
@@ -607,9 +810,9 @@
       "prepTime": 10,
       "cookTime": 0,
       "servings": 2,
-      "category": "Healthy",
-      "createdAt": 1729352400000,
-      "updatedAt": 1729352400000
+      "category": "Salad",
+      "createdAt": 1729702800000,
+      "updatedAt": 1729702800000
     }
   ],
   "reviews": [
@@ -619,7 +822,7 @@
       "authorId": "d063",
       "rating": 5,
       "comment": "Absolutely delicious! The creamy sauce was perfect. I followed the recipe exactly and it turned out amazing. My family loved it!",
-      "createdAt": 1729360000000
+      "createdAt": 1761085538112
     },
     {
       "id": "2",
@@ -627,7 +830,7 @@
       "authorId": "d243",
       "rating": 4,
       "comment": "Great recipe! I added a bit more pepper for extra kick. Cooking time was spot on.",
-      "createdAt": 1729370000000
+      "createdAt": 1761085538112
     },
     {
       "id": "3",
@@ -635,7 +838,7 @@
       "authorId": "d063",
       "rating": 5,
       "comment": "Best Chicken Tikka Masala I've ever made! The marination really makes a difference. Will definitely make again.",
-      "createdAt": 1729380000000
+      "createdAt": 1761085538112
     },
     {
       "id": "bff2",
@@ -643,23 +846,31 @@
       "recipeId": "1",
       "rating": 3,
       "comment": "Well done Mr. Diaz!",
-      "createdAt": 1761077240309
+      "createdAt": 1761085538112
     },
     {
       "id": "e6c6",
       "authorId": "d063",
-      "recipeId": "sfdxgcfgvhhjbkfygtdfrchgvujbukj",
+      "recipeId": "3",
       "rating": 2,
       "comment": "dxcgfhgvjhbknl,njbhv",
-      "createdAt": 1761078949735
+      "createdAt": 1761085538112
     },
     {
       "id": "0ecf",
       "authorId": "d063",
-      "recipeId": "sfdxgcfgvhhjbkfygtdfrchgvujbukj",
+      "recipeId": "6",
       "rating": 3,
       "comment": "dgfhcvjhb rdftguhjkl yughij,",
-      "createdAt": 1761118706268
+      "createdAt": 1761085538112
+    },
+    {
+      "id": "fc38",
+      "authorId": "d063",
+      "recipeId": "5",
+      "rating": 5,
+      "comment": "We love this dish..!!",
+      "createdAt": 1761085538112
     }
   ],
   "ingredients": [],
