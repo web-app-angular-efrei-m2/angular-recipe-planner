@@ -128,15 +128,15 @@ import { cn } from "@/utils/classes";
             </div>
           </div>
           <!-- ingredients   -->
-          <details class="accordion group rounded-xl text-gray-500 bg-gray-100 open:[--height:96px]">
+          <details class="accordion group rounded-xl text-gray-500 bg-gray-100 open:[--height:200px]">
             <summary class="button button-lg justify-start gap-1 w-full">
               <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-[1lh] shrink-0 align-middle text-purple-500 leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="M12 3V2"></path><path d="m15.4 17.4 3.2-2.8a2 2 0 1 1 2.8 2.9l-3.6 3.3c-.7.8-1.7 1.2-2.8 1.2h-4c-1.1 0-2.1-.4-2.8-1.2l-1.302-1.464A1 1 0 0 0 6.151 19H5"></path><path d="M2 14h12a2 2 0 0 1 0 4h-2"></path><path d="M4 10h16"></path><path d="M5 10a7 7 0 0 1 14 0"></path><path d="M5 14v6a1 1 0 0 1-1 1H2"></path></svg>
               <span class="text-sm mr-auto">Ingredients</span>
               <span class="text-sm">{{ recipe()?.servings }} Serving</span>
               <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-[1lh] shrink-0 align-middle text-purple-500 leading-[1em] transition-[rotate] duration-300 group-open:rotate-180" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="m6 9 6 6 6-6"></path></svg>
             </summary>
-            <div class="h-full px-4 pb-2">
-              <ul class="flex flex-col list-disc h-full overflow-auto">
+            <div class="px-4 pb-2">
+              <ul class="flex flex-col list-disc h-full max-h-[200px] overflow-auto">
                 @for (ingredient of recipe()?.ingredients; track $index) {
                   <li class="whitespace-normal items-center text-sm ml-6 marker:text-purple-500/60">{{ ingredient }}</li>
                 }

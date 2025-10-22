@@ -1,6 +1,8 @@
 import { Component, computed, inject, type OnInit, signal } from "@angular/core";
+import { DomSanitizer } from "@angular/platform-browser";
 import { RouterLink } from "@angular/router";
 import { forkJoin } from "rxjs";
+import { CATEGORY_GROUPS } from "@/app/core/config/categories.config";
 import { type Recipe, RecipeService } from "@/app/core/services/recipe.service";
 import type { Review } from "@/app/core/services/review.service";
 import { ReviewService } from "@/app/core/services/review.service";
@@ -80,12 +82,20 @@ import { cn } from "@/utils/classes";
         <div class="flex flex-1 flex-col break-words text-start">
           <div class="flex items-center justify-between pt-6 pb-2">
             <h2 class="text-xl font-semibold text-gray-900">Categories</h2>
-            <button type="button" class="button button-link text-sm font-semibold text-purple-500">See All</button>
+            <a routerLink="/discover" class="button button-link text-sm font-semibold text-purple-500">See All</a>
           </div>
           <div class="flex flex-1 gap-2 overflow-auto snap-x snap-mandatory">
             <a routerLink="/recipes" class="inline-flex items-center shrink-0 rounded-2xl tabular-nums whitespace-nowrap select-none px-4 min-h-8 text-sm bg-purple-500 text-contrast snap-start">All Categories</a>
-            @for (category of categories(); track category) {
-              <a routerLink="#" class="inline-flex items-center shrink-0 rounded-2xl tabular-nums whitespace-nowrap select-none px-4 min-h-8 text-sm bg-gray-100 text-contrast snap-start">🍝 {{ category }}</a>
+            @for (group of categoryGroups; track group.id) {
+
+              <a
+              [routerLink]="['/discover/results']"
+              [queryParams]="{ filter: group.subcategories[0].filterKey, value: group.subcategories[0].filterValue }"
+              class="inline-flex items-center gap-2 shrink-0 rounded-2xl tabular-nums whitespace-nowrap select-none px-4 min-h-8 text-sm bg-gray-100 text-contrast snap-start"
+              >
+                <span class="text-gray-400" [innerHTML]="sanitizeHtml(group.icon)"></span>
+                <span>{{ group.name }}</span>
+              </a>
             }
           </div>
         </div>
@@ -97,13 +107,12 @@ import { cn } from "@/utils/classes";
           </div>
           <div class="flex flex-1 flex-row gap-2 overflow-auto snap-x snap-mandatory">
             <!-- recipe card -->
-            @for (recipe of recipes(); track recipe.id) {
+            @for (recipe of trendingRecipes(); track recipe.id) {
               <div class="relative flex flex-col shrink-0 break-words rounded-2xl text-start max-w-2xs aspect-landscape bg-purple-100 snap-start scale-95 hover:cursor-pointer hover:scale-100 transition-[scale] duration-700"
               >
                 <div class="flex items-center justify-between p-2">
                 @if (reviews().has(recipe.id)) {
                     <span class="inline-flex items-center rounded-2xl tabular-nums whitespace-nowrap select-none px-2 min-h-6 text-sm bg-white text-contrast">
-                      🍝
                       <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-4 min-h-[1lh] shrink-0 align-middle text-yellow-500 fill-current leading-[1em]"  height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path></svg>
                       <span> {{ reviews().get(recipe.id)! | rating: 'average' }} ({{reviews().get(recipe.id)?.length}} Reviews)
                       </span>
@@ -146,6 +155,8 @@ export class RecipeListComponent implements OnInit {
   private recipeService = inject(RecipeService);
   private readonly reviewService = inject(ReviewService);
   protected reviews = signal<Map<string, Review[]>>(new Map());
+  private sanitizer = inject(DomSanitizer);
+
   protected readonly cn = cn;
 
   // Signal for loading state
@@ -157,11 +168,29 @@ export class RecipeListComponent implements OnInit {
   // Signal for error state
   protected error = signal<string | null>(null);
 
+  // Category configuration
+  protected categoryGroups = CATEGORY_GROUPS;
+
   // Computed signal for unique categories
   protected categories = computed(() => {
     const allRecipes = this.recipes();
     const uniqueCategories = [...new Set(allRecipes.map((r) => r.category))];
-    return uniqueCategories.sort();
+    return uniqueCategories.sort().splice(0, 4); // Top 5 categories
+  });
+
+  // Computed: Trending recipes (top recipes with most reviews or highest ratings)
+  protected trendingRecipes = computed(() => {
+    const allRecipes = this.recipes();
+    const reviewsMap = this.reviews();
+
+    // Sort recipes by number of reviews
+    const sorted = [...allRecipes].sort((a, b) => {
+      const aReviews = reviewsMap.get(a.id)?.length || 0;
+      const bReviews = reviewsMap.get(b.id)?.length || 0;
+      return bReviews - aReviews;
+    });
+
+    return sorted.slice(0, 5); // Top 5 trending recipes
   });
 
   ngOnInit(): void {
@@ -239,5 +268,12 @@ export class RecipeListComponent implements OnInit {
     const ingredientFactor = recipe.ingredients.length * 30;
     const servingFactor = Math.floor(100 / recipe.servings);
     return baseCalories + ingredientFactor + servingFactor;
+  }
+
+  /**
+   * Sanitize HTML for SVG icons
+   */
+  protected sanitizeHtml(html: string) {
+    return this.sanitizer.bypassSecurityTrustHtml(html);
   }
 }
