@@ -35,10 +35,11 @@
       "category": "Italian",
       "cuisine": "Italian",
       "dietaryTags": [],
-      "mealType": ["lunch", "dinner"],
+      "mealType": [
+        "lunch",
+        "dinner"
+      ],
       "spiceLevel": 0,
-      "isPopular": true,
-      "isTrending": false,
       "calories": 520,
       "protein": 24,
       "createdAt": 1729350000000,
@@ -64,11 +65,14 @@
       "servings": 6,
       "category": "Indian",
       "cuisine": "Indian",
-      "dietaryTags": ["gluten-free"],
-      "mealType": ["lunch", "dinner"],
+      "dietaryTags": [
+        "gluten-free"
+      ],
+      "mealType": [
+        "lunch",
+        "dinner"
+      ],
       "spiceLevel": 2,
-      "isPopular": true,
-      "isTrending": true,
       "calories": 380,
       "protein": 32,
       "createdAt": 1729350100000,
@@ -91,11 +95,13 @@
       "servings": 4,
       "category": "Salad",
       "cuisine": "American",
-      "dietaryTags": ["vegetarian"],
-      "mealType": ["lunch"],
+      "dietaryTags": [
+        "vegetarian"
+      ],
+      "mealType": [
+        "lunch"
+      ],
       "spiceLevel": 0,
-      "isPopular": false,
-      "isTrending": false,
       "calories": 220,
       "protein": 8,
       "createdAt": 1729350200000,
@@ -121,11 +127,15 @@
       "servings": 6,
       "category": "Mexican",
       "cuisine": "Mexican",
-      "dietaryTags": ["gluten-free", "dairy-free"],
-      "mealType": ["lunch", "dinner"],
+      "dietaryTags": [
+        "gluten-free",
+        "dairy-free"
+      ],
+      "mealType": [
+        "lunch",
+        "dinner"
+      ],
       "spiceLevel": 2,
-      "isPopular": true,
-      "isTrending": true,
       "calories": 340,
       "protein": 26,
       "createdAt": 1729350300000,

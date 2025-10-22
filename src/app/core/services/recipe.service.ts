@@ -22,8 +22,6 @@ export interface Recipe {
   dietaryTags?: string[]; // e.g., ["vegetarian", "gluten-free", "dairy-free", "vegan"]
   mealType?: string[]; // e.g., ["breakfast", "lunch", "dinner", "snack", "dessert"]
   spiceLevel?: 0 | 1 | 2 | 3; // 0=none, 1=mild, 2=medium, 3=spicy
-  isPopular?: boolean;
-  isTrending?: boolean;
   calories?: number;
   protein?: number;
   author?: string;

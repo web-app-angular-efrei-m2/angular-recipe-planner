@@ -1,4 +1,5 @@
 import { createFeatureSelector, createSelector } from "@ngrx/store";
+import { selectRatingStatsMap, selectReviewsByRecipeMap } from "../reviews/reviews.selectors";
 import { type RecipesState, recipesFeatureKey } from "./recipes.reducer";
 
 /**
@@ -147,16 +148,6 @@ export const selectUniqueCuisines = createSelector(selectAllRecipes, (recipes) =
 });
 
 /**
- * Select trending recipes
- */
-export const selectTrendingRecipes = createSelector(selectAllRecipes, (recipes) => recipes.filter((r) => r.isTrending));
-
-/**
- * Select popular recipes
- */
-export const selectPopularRecipes = createSelector(selectAllRecipes, (recipes) => recipes.filter((r) => r.isPopular));
-
-/**
  * Select recipes by category
  */
 export const selectRecipesByCategory = (category: string) =>
@@ -197,4 +188,72 @@ export const selectHasActiveFilters = createSelector(selectRecipeFilters, (filte
     filters.spiceLevel !== undefined ||
     !!filters.difficulty
   );
+});
+
+/**
+ * Select popular recipes (recipes with high review count or rating)
+ * A recipe is considered popular if it has 3+ reviews with average rating >= 4
+ */
+export const selectPopularRecipes = createSelector(selectAllRecipes, selectReviewsByRecipeMap, selectRatingStatsMap, (recipes, reviewsMap, ratingsMap) => {
+  return recipes.filter((recipe) => {
+    const reviews = reviewsMap.get(recipe.id);
+    const stats = ratingsMap.get(recipe.id);
+
+    if (!reviews || !stats) {
+      return false;
+    }
+
+    // Popular = 3+ reviews AND average rating >= 4
+    return reviews.length >= 3 && stats.average >= 4;
+  });
+});
+
+/**
+ * Select trending recipes (recently created recipes with good engagement)
+ * A recipe is trending if it was created in the last 30 days and has 2+ reviews
+ */
+export const selectTrendingRecipes = createSelector(selectAllRecipes, selectReviewsByRecipeMap, (recipes, reviewsMap) => {
+  const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+
+  return recipes.filter((recipe) => {
+    const reviews = reviewsMap.get(recipe.id);
+    const isRecent = recipe.createdAt >= thirtyDaysAgo;
+    const hasEngagement = reviews && reviews.length >= 2;
+
+    return isRecent && hasEngagement;
+  });
+});
+
+/**
+ * Check if a specific recipe is popular
+ */
+export const selectIsRecipePopular = (recipeId: string) =>
+  createSelector(selectPopularRecipes, (popularRecipes) => {
+    return popularRecipes.some((recipe) => recipe.id === recipeId);
+  });
+
+/**
+ * Check if a specific recipe is trending
+ */
+export const selectIsRecipeTrending = (recipeId: string) =>
+  createSelector(selectTrendingRecipes, (trendingRecipes) => {
+    return trendingRecipes.some((recipe) => recipe.id === recipeId);
+  });
+
+/**
+ * Select recipes sorted by popularity (review count * average rating)
+ */
+export const selectRecipesByPopularity = createSelector(selectAllRecipes, selectReviewsByRecipeMap, selectRatingStatsMap, (recipes, reviewsMap, ratingsMap) => {
+  return [...recipes].sort((a, b) => {
+    const aReviews = reviewsMap.get(a.id)?.length || 0;
+    const bReviews = reviewsMap.get(b.id)?.length || 0;
+    const aRating = ratingsMap.get(a.id)?.average || 0;
+    const bRating = ratingsMap.get(b.id)?.average || 0;
+
+    // Popularity score = review count * average rating
+    const aScore = aReviews * aRating;
+    const bScore = bReviews * bRating;
+
+    return bScore - aScore;
+  });
 });

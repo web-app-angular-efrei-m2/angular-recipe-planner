@@ -1,14 +1,12 @@
-import { Component, computed, inject, type OnInit, signal } from "@angular/core";
+import { Component, computed, effect, inject, type OnDestroy, type OnInit } from "@angular/core";
 import { DomSanitizer } from "@angular/platform-browser";
 import { RouterLink } from "@angular/router";
 import { Store } from "@ngrx/store";
-import { forkJoin } from "rxjs";
 import { CATEGORY_GROUPS } from "@/app/core/config/categories.config";
-import type { Recipe } from "@/app/core/services/recipe.service";
-import type { Review } from "@/app/core/services/review.service";
-import { ReviewService } from "@/app/core/services/review.service";
 import { loadRecipes } from "@/app/core/state/recipes/recipes.actions";
-import { selectAllRecipes, selectRecipesError, selectRecipesLoading } from "@/app/core/state/recipes/recipes.selectors";
+import { selectAllRecipes, selectRecipesByPopularity, selectRecipesError, selectRecipesLoading } from "@/app/core/state/recipes/recipes.selectors";
+import { loadReviewsByRecipeId } from "@/app/core/state/reviews/reviews.actions";
+import { selectAreReviewsLoadedForRecipe, selectReviewsByRecipeMap } from "@/app/core/state/reviews/reviews.selectors";
 import { DifficultyLevelPipe } from "@/app/shared/pipes/difficulty-level.pipe";
 import { RatingPipe } from "@/app/shared/pipes/rating.pipe";
 import { cn } from "@/utils/classes";
@@ -90,7 +88,6 @@ import { cn } from "@/utils/classes";
           <div class="flex flex-1 gap-2 overflow-auto snap-x snap-mandatory">
             <a routerLink="/recipes" class="inline-flex items-center shrink-0 rounded-2xl tabular-nums whitespace-nowrap select-none px-4 min-h-8 text-sm bg-purple-500 text-contrast snap-start">All Categories</a>
             @for (group of categoryGroups; track group.id) {
-
               <a
               [routerLink]="['/discover/results']"
               [queryParams]="{ filter: group.subcategories[0].filterKey, value: group.subcategories[0].filterValue }"
@@ -154,110 +151,55 @@ import { cn } from "@/utils/classes";
     </div>
   `,
 })
-export class RecipeListComponent implements OnInit {
-  private readonly reviewService = inject(ReviewService);
+export class RecipeListComponent implements OnInit, OnDestroy {
   private readonly store = inject(Store);
   private sanitizer = inject(DomSanitizer);
 
   protected readonly cn = cn;
-
-  protected reviews = signal<Map<string, Review[]>>(new Map());
 
   // Select data from NgRx store
   protected recipes = this.store.selectSignal(selectAllRecipes);
   protected loading = this.store.selectSignal(selectRecipesLoading);
   protected error = this.store.selectSignal(selectRecipesError);
 
+  // Select reviews from NgRx store
+  protected reviews = this.store.selectSignal(selectReviewsByRecipeMap);
+
+  // Select recipes sorted by popularity for trending section
+  protected recipesByPopularity = this.store.selectSignal(selectRecipesByPopularity);
+
   // Category configuration
   protected categoryGroups = CATEGORY_GROUPS;
 
-  // Computed signal for unique categories
-  protected categories = computed(() => {
-    const allRecipes = this.recipes();
-    const uniqueCategories = [...new Set(allRecipes.map((r) => r.category))];
-    return uniqueCategories.sort().splice(0, 4); // Top 5 categories
+  // Computed: Trending recipes - Top 5 recipes sorted by popularity (review count * rating)
+  protected trendingRecipes = computed(() => {
+    return this.recipesByPopularity().slice(0, 5);
   });
 
-  // Computed: Trending recipes (top recipes with most reviews or highest ratings)
-  protected trendingRecipes = computed(() => {
-    const allRecipes = this.recipes();
-    const reviewsMap = this.reviews();
+  // Effect to load reviews for all recipes (needed for popularity calculation)
+  // Only loads reviews that haven't been loaded yet to avoid duplicate API calls
+  private loadReviewsEffect = effect(() => {
+    const allRecipes = this.trendingRecipes();
 
-    // Sort recipes by number of reviews
-    const sorted = [...allRecipes].sort((a, b) => {
-      const aReviews = reviewsMap.get(a.id)?.length || 0;
-      const bReviews = reviewsMap.get(b.id)?.length || 0;
-      return bReviews - aReviews;
-    });
+    // Load reviews for all recipes so we can calculate popularity
+    for (const recipe of allRecipes) {
+      // Check if reviews for this recipe are already loaded
+      const areLoaded = this.store.selectSignal(selectAreReviewsLoadedForRecipe(recipe.id))();
 
-    return sorted.slice(0, 5); // Top 5 trending recipes
+      if (!areLoaded) {
+        this.store.dispatch(loadReviewsByRecipeId({ recipeId: recipe.id }));
+      }
+    }
   });
 
   ngOnInit(): void {
     // Dispatch action to load recipes from the store
     this.store.dispatch(loadRecipes());
-    this.loadReviews();
   }
 
-  /**
-   * Load reviews for all recipes
-   */
-  private loadReviews(): void {
-    // Subscribe to recipes from store
-    const recipesSubscription = this.store.select(selectAllRecipes).subscribe((recipes) => {
-      if (recipes.length === 0) {
-        return;
-      }
-
-      // Create an array of observables for all review requests
-      const reviewObservables = recipes.map((recipe) => this.reviewService.getReviewsByRecipeId(recipe.id));
-
-      // Use forkJoin to wait for all requests to complete
-      forkJoin(reviewObservables).subscribe({
-        next: (reviewsArray) => {
-          const reviewsMap = new Map<string, Review[]>();
-
-          // Map each review array to its recipe ID
-          recipes.forEach((recipe, index) => {
-            reviewsMap.set(recipe.id, reviewsArray[index]);
-          });
-
-          this.reviews.set(reviewsMap);
-          console.log("✅ All reviews loaded successfully");
-        },
-        error: (error: Error) => {
-          console.error("❌ Failed to load reviews:", error);
-        },
-      });
-
-      // Unsubscribe after first emission
-      recipesSubscription.unsubscribe();
-    });
-  }
-
-  /**
-   * Handle search input change
-   */
-  protected onSearchChange(): void {
-    // Search is reactive via signal, no action needed
-  }
-
-  /**
-   * Get random number of reviews for demo purposes
-   */
-  protected getRandomReviews(): number {
-    return Math.floor(Math.random() * 200) + 50;
-  }
-
-  /**
-   * Calculate mock calories based on recipe attributes
-   */
-  protected getCalories(recipe: Recipe): number {
-    // Simple mock calculation
-    const baseCalories = 200;
-    const ingredientFactor = recipe.ingredients.length * 30;
-    const servingFactor = Math.floor(100 / recipe.servings);
-    return baseCalories + ingredientFactor + servingFactor;
+  ngOnDestroy(): void {
+    // If you had manual effects, you would clean them up here
+    this.loadReviewsEffect.destroy();
   }
 
   /**
