@@ -1,4 +1,4 @@
-import { CommonModule } from "@angular/common";
+import { CommonModule, Location } from "@angular/common";
 import { Component, computed, effect, inject, type OnDestroy, type OnInit } from "@angular/core";
 import { ActivatedRoute, RouterLink } from "@angular/router";
 import { Store } from "@ngrx/store";
@@ -17,9 +17,9 @@ import { cn } from "@/utils/classes";
     <div class="flex flex-1 flex-col h-dvh break-words rounded-sm text-start font-semibold text-gray-400 bg-purple-100">
       <!-- navigation buttons  -->
       <div class="flex items-center justify-between px-6 pt-6">
-        <a routerLink="/recipes" class="button button-sm button-solid rounded-full bg-white p-0">
+        <button type="button" (click)="goBack()" class="button button-sm button-solid rounded-full bg-white p-0">
           <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-4 min-h-[1lh] shrink-0 align-middle text-current leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
-        </a>
+        </button>
         <button type="button" class="button button-sm button-solid rounded-full bg-white p-0">
           <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-4 min-h-[1lh] shrink-0 align-middle text-current leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg>
         </button>
@@ -242,6 +242,7 @@ import { cn } from "@/utils/classes";
 })
 export class RecipeDetailComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
+  private location = inject(Location);
   private readonly store = inject(Store);
 
   protected readonly cn = cn;
@@ -289,5 +290,9 @@ export class RecipeDetailComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     // Cleanup effect
     this.loadDataEffect.destroy();
+  }
+
+  protected goBack(): void {
+    this.location.back();
   }
 }

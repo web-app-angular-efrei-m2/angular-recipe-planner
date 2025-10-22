@@ -1,3 +1,4 @@
+import { Location } from "@angular/common";
 import { Component, computed, effect, inject, type OnDestroy, type OnInit, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
@@ -23,6 +24,7 @@ import { cn } from "@/utils/classes";
         class="sticky inset-0 z-10 flex items-center justify-between shrink-0 h-[var(--header-height)] px-4 pt-0 bg-white"
       >
         <button
+          type="button"
           (click)="goBack()"
           class="button button-sm button-ghost rounded-full p-0"
         >
@@ -298,6 +300,7 @@ export class DiscoverResultsComponent implements OnInit, OnDestroy {
   private readonly store = inject(Store);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private location = inject(Location);
 
   protected readonly cn = cn;
 
@@ -517,9 +520,9 @@ export class DiscoverResultsComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Go back to discover page
+   * Go back to the previous page
    */
   protected goBack(): void {
-    this.router.navigate(["/discover"]);
+    this.location.back();
   }
 }
