@@ -9,6 +9,10 @@ import { routes } from "./app.routes";
 import { authInterceptor } from "./core/interceptors/auth.interceptor";
 import { AuthEffects } from "./core/state/auth/auth.effects";
 import { authFeatureKey, authReducer } from "./core/state/auth/auth.reducer";
+import { RecipesEffects } from "./core/state/recipes/recipes.effects";
+import { recipesFeatureKey, recipesReducer } from "./core/state/recipes/recipes.reducer";
+import { ReviewsEffects } from "./core/state/reviews/reviews.effects";
+import { reviewsFeatureKey, reviewsReducer } from "./core/state/reviews/reviews.reducer";
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -22,9 +26,11 @@ export const appConfig: ApplicationConfig = {
     // NgRx Store Configuration
     provideStore({
       [authFeatureKey]: authReducer, // Register auth reducer
+      [recipesFeatureKey]: recipesReducer, // Register recipes reducer
+      [reviewsFeatureKey]: reviewsReducer, // Register reviews reducer
     }),
     // NgRx Effects
-    provideEffects([AuthEffects]),
+    provideEffects([AuthEffects, RecipesEffects, ReviewsEffects]),
     // NgRx DevTools (only in development)
     provideStoreDevtools({
       maxAge: 25, // Retains last 25 states

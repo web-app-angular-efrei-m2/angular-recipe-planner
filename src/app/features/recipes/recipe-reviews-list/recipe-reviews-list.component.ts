@@ -1,4 +1,4 @@
-import { CommonModule } from "@angular/common";
+import { CommonModule, Location } from "@angular/common";
 import { Component, inject, type OnInit, signal } from "@angular/core";
 import { ActivatedRoute, RouterLink } from "@angular/router";
 import { switchMap, tap } from "rxjs/operators";
@@ -14,9 +14,9 @@ import { type Review, ReviewService } from "../../../core/services/review.servic
     <div class="relative flex flex-1 flex-col h-[calc(100dvh-97px)] break-words rounded-sm text-start font-semibold text-gray-400">
       <!-- navigation buttons  -->
        <div class="sticky inset-0 z-10 flex items-center justify-between shrink-0 h-[var(--header-height)] px-6 pt-0 bg-white">
-        <a [routerLink]="['/recipes', recipeId()]" class="button button-sm button-ghost rounded-full p-0">
+        <button type="button" (click)="goBack()" class="button button-sm button-ghost rounded-full p-0">
           <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-[1lh] shrink-0 align-middle text-current leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
-        </a>
+        </button>
         <h2 class="text-sm text-gray-800 font-semibold">Reviews</h2>
         <div class="button-sm p-0"></div>
        </div>
@@ -111,6 +111,7 @@ import { type Review, ReviewService } from "../../../core/services/review.servic
 })
 export class RecipeReviewsListComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly location = inject(Location);
   private readonly recipeService = inject(RecipeService);
   private readonly reviewService = inject(ReviewService);
 
@@ -189,5 +190,12 @@ export class RecipeReviewsListComponent implements OnInit {
       return `${minutes} minute${minutes !== 1 ? "s" : ""} ago`;
     }
     return "Just now";
+  }
+
+  /**
+   * Go back to the previous page
+   */
+  protected goBack(): void {
+    this.location.back();
   }
 }

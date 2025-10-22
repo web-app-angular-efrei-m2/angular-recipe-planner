@@ -3,7 +3,7 @@ import { Injectable, inject } from "@angular/core";
 import { catchError, type Observable, throwError } from "rxjs";
 
 /**
- * Recipe Interface
+ * Recipe Interface with Enhanced Filter Properties
  */
 export interface Recipe {
   id: string;
@@ -16,8 +16,40 @@ export interface Recipe {
   servings: number;
   category: string;
   imageUrl?: string;
+
+  // Enhanced filter properties
+  cuisine?: string; // e.g., "Italian", "Asian", "Mexican"
+  dietaryTags?: string[]; // e.g., ["vegetarian", "gluten-free", "dairy-free", "vegan"]
+  mealType?: string[]; // e.g., ["breakfast", "lunch", "dinner", "snack", "dessert"]
+  spiceLevel?: 0 | 1 | 2 | 3; // 0=none, 1=mild, 2=medium, 3=spicy
+  calories?: number;
+  protein?: number;
+  author?: string;
+  rating?: number;
+  reviewCount?: number;
+
   createdAt: number;
   updatedAt: number;
+}
+
+/**
+ * Category Group Interface for hierarchical categories
+ */
+export interface CategoryGroup {
+  id: string;
+  name: string;
+  icon: string; // SVG icon or icon identifier
+  subcategories: Subcategory[];
+}
+
+/**
+ * Subcategory Interface
+ */
+export interface Subcategory {
+  id: string;
+  name: string;
+  filterKey: string; // The property to filter by (e.g., 'cuisine', 'dietaryTags')
+  filterValue: string; // The value to filter for
 }
 
 /**

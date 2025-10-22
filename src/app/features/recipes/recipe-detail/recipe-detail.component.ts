@@ -1,9 +1,11 @@
-import { CommonModule } from "@angular/common";
-import { Component, inject, type OnInit, signal } from "@angular/core";
+import { CommonModule, Location } from "@angular/common";
+import { Component, computed, effect, inject, type OnDestroy, type OnInit } from "@angular/core";
 import { ActivatedRoute, RouterLink } from "@angular/router";
-import { type Recipe, RecipeService } from "@/app/core/services/recipe.service";
-import type { Review } from "@/app/core/services/review.service";
-import { ReviewService } from "@/app/core/services/review.service";
+import { Store } from "@ngrx/store";
+import { loadRecipes, selectRecipe } from "@/app/core/state/recipes/recipes.actions";
+import { selectRecipeById, selectRecipesError, selectRecipesLoading } from "@/app/core/state/recipes/recipes.selectors";
+import { loadReviewsByRecipeId } from "@/app/core/state/reviews/reviews.actions";
+import { selectAreReviewsLoadedForRecipe, selectReviewsForRecipe } from "@/app/core/state/reviews/reviews.selectors";
 import { DifficultyLevelPipe } from "@/app/shared/pipes/difficulty-level.pipe";
 import { RatingPipe } from "@/app/shared/pipes/rating.pipe";
 import { cn } from "@/utils/classes";
@@ -15,9 +17,9 @@ import { cn } from "@/utils/classes";
     <div class="flex flex-1 flex-col h-dvh break-words rounded-sm text-start font-semibold text-gray-400 bg-purple-100">
       <!-- navigation buttons  -->
       <div class="flex items-center justify-between px-6 pt-6">
-        <a routerLink="/recipes" class="button button-sm button-solid rounded-full bg-white p-0">
+        <button type="button" (click)="goBack()" class="button button-sm button-solid rounded-full bg-white p-0">
           <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-4 min-h-[1lh] shrink-0 align-middle text-current leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
-        </a>
+        </button>
         <button type="button" class="button button-sm button-solid rounded-full bg-white p-0">
           <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-4 min-h-[1lh] shrink-0 align-middle text-current leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg>
         </button>
@@ -106,8 +108,8 @@ import { cn } from "@/utils/classes";
             <p class="text-md text-gray-800">Description</p>
             <p class="text-sm line-clamp-3">{{ recipe()?.description }}</p>
           </div>
-          <!-- cooking time   -->
-          <div class="flex gap-2">
+          <!-- cooking time & nutrition info -->
+          <div class="grid grid-cols-2 gap-2 py-2">
             <div class="flex flex-1 items-center gap-2 p-2 rounded-xl bg-gray-100">
               <span class="size-10 bg-white flex items-center justify-center rounded-full">
                 <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-[1lh] shrink-0 align-middle text-purple-500 leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
@@ -123,25 +125,54 @@ import { cn } from "@/utils/classes";
               </span>
               <div class="flex flex-col">
                 <span class="text-xs text-gray-500">Cuisine</span>
-                <span class="text-sm text-purple-500">{{ recipe()?.category }}</span>
+                <span class="text-sm text-purple-500">{{ recipe()?.cuisine }}</span>
+              </div>
+            </div>
+            <div class="flex flex-1 items-center gap-2 p-2 rounded-xl bg-gray-100">
+              <span class="size-10 bg-white flex items-center justify-center rounded-full">
+                <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-[1lh] shrink-0 align-middle text-purple-500 leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
+              </span>
+              <div class="flex flex-col">
+                <span class="text-xs text-gray-500">Calories</span>
+                <span class="text-sm text-purple-500">{{ recipe()?.calories }} kcal</span>
+              </div>
+            </div>
+            <div class="flex flex-1 items-center gap-2 p-2 rounded-xl bg-gray-100">
+              <span class="size-10 bg-white flex items-center justify-center rounded-full">
+                <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-[1lh] shrink-0 align-middle text-purple-500 leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="m6.5 6.5.4-1.3C7.2 4.5 7.9 4 8.7 4c1.1 0 1.8.9 1.6 2L9.7 9h3.6l.6-3.3c.3-1.1 1-1.7 1.9-1.7 1.1 0 1.8.9 1.6 2l-.6 3.3h2.5c1.2 0 1.9 1 1.6 2.1-.2.8-.9 1.6-1.7 1.6h-3l-.9 5h2.5c1.2 0 1.9 1 1.6 2.1-.2.8-.9 1.6-1.7 1.6h-3l-.4 1.3c-.3.7-1 1.3-1.8 1.3-1.1 0-1.8-.9-1.6-2l.6-2.6H7.4l-.4 1.3c-.3.7-1 1.3-1.8 1.3-1.1 0-1.8-.9-1.6-2l.6-2.6H1.7c-1.2 0-1.9-1-1.6-2.1.2-.8.9-1.6 1.7-1.6h3l.9-5H3.2c-1.2 0-1.9-1-1.6-2.1.2-.8.9-1.6 1.7-1.6h3.2zm4.3 7.5-.9 5h3.6l.9-5H10.8z"></path></svg>
+              </span>
+              <div class="flex flex-col">
+                <span class="text-xs text-gray-500">Protein</span>
+                <span class="text-sm text-purple-500">{{ recipe()?.protein }}g</span>
               </div>
             </div>
           </div>
           <!-- ingredients   -->
-          <details class="accordion group rounded-xl text-gray-500 bg-gray-100 open:[--height:96px]">
+          <details class="accordion group rounded-xl text-gray-500 bg-gray-100 open:[--height:200px]">
             <summary class="button button-lg justify-start gap-1 w-full">
-              <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-[1lh] shrink-0 align-middle text-purple-500 leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="M12 3V2"></path><path d="m15.4 17.4 3.2-2.8a2 2 0 1 1 2.8 2.9l-3.6 3.3c-.7.8-1.7 1.2-2.8 1.2h-4c-1.1 0-2.1-.4-2.8-1.2l-1.302-1.464A1 1 0 0 0 6.151 19H5"></path><path d="M2 14h12a2 2 0 0 1 0 4h-2"></path><path d="M4 10h16"></path><path d="M5 10a7 7 0 0 1 14 0"></path><path d="M5 14v6a1 1 0 0 1-1 1H2"></path></svg>
+              <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-[1lh] shrink-0 align-middle text-purple-500 leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="m5 11 4-7"></path><path d="m19 11-4-7"></path><path d="M2 11h20"></path><path d="M3.5 11 2 16c-.4 1.3.3 2 1.4 2h17.2c1.1 0 1.8-.7 1.4-2L20.5 11"></path></svg>
               <span class="text-sm mr-auto">Ingredients</span>
               <span class="text-sm">{{ recipe()?.servings }} Serving</span>
               <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-[1lh] shrink-0 align-middle text-purple-500 leading-[1em] transition-[rotate] duration-300 group-open:rotate-180" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="m6 9 6 6 6-6"></path></svg>
             </summary>
-            <div class="h-full px-4 pb-2">
-              <ul class="flex flex-col list-disc h-full overflow-auto">
+            <div class="px-4 pb-2">
+              <ul class="flex flex-col list-disc h-full max-h-[200px] overflow-auto">
                 @for (ingredient of recipe()?.ingredients; track $index) {
                   <li class="whitespace-normal items-center text-sm ml-6 marker:text-purple-500/60">{{ ingredient }}</li>
                 }
               </ul>
             </div>
+          </details>
+          <!-- instructions   -->
+          <details open class="accordion group rounded-xl text-gray-500 bg-gray-100 open:[--height:200px]">
+            <summary class="button button-lg justify-start gap-1 w-full">
+              <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-[1lh] shrink-0 align-middle text-purple-500 leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1Z"></path><path d="M9 12h6"></path><path d="M9 16h6"></path></svg>
+              <span class="text-sm mr-auto">Instructions</span>
+              <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-[1lh] shrink-0 align-middle text-purple-500 leading-[1em] transition-[rotate] duration-300 group-open:rotate-180" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="m6 9 6 6 6-6"></path></svg>
+            </summary>
+            <p class="px-4 pb-2 text-sm">
+              {{ recipe()?.instructions }}
+            </p>
           </details>
           <!-- ratings  -->
           @if ((reviews() | rating:'average') > 0) {
@@ -209,58 +240,59 @@ import { cn } from "@/utils/classes";
     </div>
   `,
 })
-export class RecipeDetailComponent implements OnInit {
+export class RecipeDetailComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
-  private recipeService = inject(RecipeService);
-  private readonly reviewService = inject(ReviewService);
-  protected reviews = signal<Review[]>([]);
+  private location = inject(Location);
+  private readonly store = inject(Store);
 
   protected readonly cn = cn;
   protected readonly Math = Math;
 
-  protected recipeId = signal<string>("");
-  protected recipe = signal<Recipe | null>(null);
-  // protected recipe$: Observable<Recipe> | null = null;
-  // Signal for loading state
-  protected loading = signal<boolean>(false);
-  // Signal for error state
-  protected error = signal<string | null>(null);
+  // Get recipe ID from route
+  private recipeId = this.route.snapshot.paramMap.get("id") || "";
+
+  // Select data from NgRx store
+  protected recipe = this.store.selectSignal(selectRecipeById(this.recipeId));
+  protected loading = this.store.selectSignal(selectRecipesLoading);
+  protected error = this.store.selectSignal(selectRecipesError);
+
+  // Select reviews for this recipe
+  protected reviews = computed(() => {
+    const reviewsList = this.store.selectSignal(selectReviewsForRecipe(this.recipeId))();
+    // Sort by date (newest first)
+    return [...reviewsList].sort((a, b) => b.createdAt - a.createdAt);
+  });
+
+  // Effect to load recipe and reviews
+  private loadDataEffect = effect(() => {
+    // Dispatch action to load recipes if not already loaded
+    this.store.dispatch(loadRecipes());
+
+    // Dispatch action to select this specific recipe
+    this.store.dispatch(selectRecipe({ id: this.recipeId }));
+
+    // Check if reviews are already loaded for this recipe
+    const areReviewsLoaded = this.store.selectSignal(selectAreReviewsLoadedForRecipe(this.recipeId))();
+
+    if (!areReviewsLoaded) {
+      console.log(`🔄 Loading reviews for recipe ${this.recipeId}`);
+      this.store.dispatch(loadReviewsByRecipeId({ recipeId: this.recipeId }));
+    } else {
+      console.log(`✅ Reviews already loaded for recipe ${this.recipeId}`);
+    }
+  });
 
   ngOnInit(): void {
-    // Get recipeId from route params
-    const id = this.route.snapshot.paramMap.get("id");
-    if (id) {
-      this.recipeId.set(id);
-      this.loadRecipe();
-      this.loadReviews();
-    }
+    // Effect will handle loading
+    console.log("🎯 Recipe Detail Component initialized for recipe:", this.recipeId);
   }
 
-  private loadRecipe(): void {
-    this.recipeService.getRecipeById(this.recipeId()).subscribe({
-      next: (recipe) => {
-        this.recipe.set(recipe);
-        console.log("✅ Recipe loaded:", recipe);
-      },
-      error: (error: Error) => {
-        console.error("❌ Failed to load recipe:", error);
-      },
-    });
+  ngOnDestroy(): void {
+    // Cleanup effect
+    this.loadDataEffect.destroy();
   }
 
-  private loadReviews(): void {
-    this.reviewService.getReviewsByRecipeId(this.recipeId()).subscribe({
-      next: (reviews) => {
-        // Reviews already have author data populated by the service
-        const sortedReviews = reviews.sort((a, b) => b.createdAt - a.createdAt);
-        this.reviews.set(sortedReviews);
-        console.log("✅ Reviews loaded:", reviews.length);
-        this.loading.set(false);
-      },
-      error: (error: Error) => {
-        console.error("❌ Failed to load reviews:", error);
-        this.loading.set(false);
-      },
-    });
+  protected goBack(): void {
+    this.location.back();
   }
 }
