@@ -133,6 +133,37 @@ export const authReducer = createReducer(
     token,
     isAuthenticated: true,
   })),
+
+  /**
+   * Update User Action Handler
+   * Sets loading to true while updating user profile
+   */
+  on(AuthActions.updateUser, (state) => ({
+    ...state,
+    loading: true,
+    error: null,
+  })),
+
+  /**
+   * Update User Success Action Handler
+   * Updates the user in the state with the new data
+   */
+  on(AuthActions.updateUserSuccess, (state, { user }) => ({
+    ...state,
+    user,
+    loading: false,
+    error: null,
+  })),
+
+  /**
+   * Update User Failure Action Handler
+   * Sets error message and clears loading state
+   */
+  on(AuthActions.updateUserFailure, (state, { error }) => ({
+    ...state,
+    loading: false,
+    error,
+  })),
 );
 
 /**

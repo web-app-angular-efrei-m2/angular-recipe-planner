@@ -58,3 +58,18 @@ export const loadUserFromStorage = createAction("[Auth] Load User From Storage")
  * Load User From Storage Success Action.
  */
 export const loadUserFromStorageSuccess = createAction("[Auth] Load User From Storage Success", props<{ user: User; token: string }>());
+
+/**
+ * Update User Action - Dispatched when user updates their profile.
+ */
+export const updateUser = createAction("[Auth] Update User", props<{ userId: string; userData: Partial<User> }>());
+
+/**
+ * Update User Success Action - Dispatched when user update is successful.
+ */
+export const updateUserSuccess = createAction("[Auth] Update User Success", props<{ user: User }>());
+
+/**
+ * Update User Failure Action - Dispatched when user update fails.
+ */
+export const updateUserFailure = createAction("[Auth] Update User Failure", props<{ error: string }>());

@@ -1,4 +1,5 @@
 import { createFeatureSelector, createSelector } from "@ngrx/store";
+import { selectUser } from "../auth/auth.selectors";
 import { selectRatingStatsMap, selectReviewsByRecipeMap } from "../reviews/reviews.selectors";
 import { type RecipesState, recipesFeatureKey } from "./recipes.reducer";
 
@@ -258,4 +259,16 @@ export const selectRecipesByPopularity = createSelector(selectAllRecipes, select
 
     return bScore - aScore;
   });
+});
+
+/**
+ * Select bookmarked recipes for the current user
+ * Returns an array of recipes that are in the user's bookmarks
+ */
+export const selectBookmarkedRecipes = createSelector(selectAllRecipes, selectUser, (recipes, user) => {
+  if (!user || !user.bookmarks || user.bookmarks.length === 0) {
+    return [];
+  }
+  const bookmarks = user.bookmarks;
+  return recipes.filter((recipe) => bookmarks.includes(recipe.id));
 });

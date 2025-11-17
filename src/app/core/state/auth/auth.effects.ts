@@ -4,6 +4,7 @@ import { Actions, createEffect, ofType } from "@ngrx/effects";
 import { of } from "rxjs";
 import { catchError, map, switchMap, tap } from "rxjs/operators";
 import { AuthService } from "@/app/core/services/auth";
+import { UserService } from "@/app/core/services/user.service";
 import * as AuthActions from "./auth.actions";
 
 // LocalStorage key for token
@@ -24,6 +25,7 @@ const TOKEN_KEY = "auth_token";
 export class AuthEffects {
   private actions$ = inject(Actions);
   private authService = inject(AuthService);
+  private userService = inject(UserService);
   private router = inject(Router);
 
   /**
@@ -143,7 +145,7 @@ export class AuthEffects {
         tap(() => {
           console.log("🎯 Effect: Logging out, clearing token");
           localStorage.removeItem(TOKEN_KEY);
-          this.router.navigate(["/auth/login"]);
+          this.router.navigate(["/"]);
         }),
       ),
     { dispatch: false }, // This effect doesn't dispatch another action
@@ -186,6 +188,33 @@ export class AuthEffects {
           }),
         );
       }),
+    ),
+  );
+
+  /**
+   * Update User Effect - Handles the async user update operation
+   *
+   * Flow:
+   * 1. Listens for [Auth] Update User action
+   * 2. Calls UserService.updateUser() (HTTP PATCH to update user)
+   * 3. Dispatches [Auth] Update User Success with updated user
+   * 4. If error occurs, dispatches [Auth] Update User Failure
+   */
+  updateUser$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AuthActions.updateUser),
+      switchMap(({ userId, userData }) =>
+        this.userService.updateUser(userId, userData).pipe(
+          map((user) => {
+            console.log("🎯 Effect: User update successful");
+            return AuthActions.updateUserSuccess({ user });
+          }),
+          catchError((error) => {
+            console.error("❌ Effect: User update failed:", error.message);
+            return of(AuthActions.updateUserFailure({ error: error.message }));
+          }),
+        ),
+      ),
     ),
   );
 }

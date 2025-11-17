@@ -5,108 +5,90 @@ import { Router, RouterLink } from "@angular/router";
 import { Store } from "@ngrx/store";
 import { login } from "@/app/core/state/auth/auth.actions";
 import { selectAuthError, selectAuthLoading, selectIsAuthenticated } from "@/app/core/state/auth/auth.selectors";
-import { emailValidator, passwordValidator } from "@/app/shared/validators/auth";
-import { FieldComponent } from "@/shared/components/ui/form/field/field.component";
 import { cn } from "@/utils/classes";
 
 @Component({
   selector: "app-login",
-  imports: [RouterLink, ReactiveFormsModule, CommonModule, FieldComponent],
+  imports: [RouterLink, ReactiveFormsModule, CommonModule],
   template: `
-    <div class="min-h-screen flex flex-1 flex-col break-words rounded-sm p-0 text-start font-semibold">
-      <!-- Hero Image Section -->
-      <div class="relative w-full h-[45vh] bg-gradient-to-br from-orange-100 via-amber-50 to-yellow-50 overflow-hidden">
+    <div class="flex flex-col min-h-screen">
+      <!-- Hero Section with Image -->
+      <div class="relative h-[45vh] overflow-hidden bg-linear-to-br from-pink-200 via-rose-200 to-orange-100">
         <div class="absolute inset-0 flex items-center justify-center">
+          <!-- Recipe-themed illustration -->
           <div class="text-8xl">🍳</div>
-          <!-- Decorative elements -->
-          <div class="absolute top-12 left-8 text-2xl rotate-12">🥗</div>
-          <div class="absolute bottom-16 right-12 text-3xl -rotate-12">🍝</div>
-          <div class="absolute top-20 right-16 text-xl">🥘</div>
-          <div class="absolute bottom-24 left-16 text-2xl rotate-45">🍲</div>
         </div>
+        <!-- Decorative elements -->
+        <div class="absolute top-16 left-8 text-2xl opacity-60">~</div>
+        <div class="absolute top-12 right-12 text-xl opacity-60">✧</div>
+        <div class="absolute bottom-20 left-16 text-2xl opacity-60">•</div>
+        <div class="absolute bottom-16 right-8 text-xl opacity-60">~</div>
+        <div class="absolute top-1/3 right-20 text-lg opacity-60">•</div>
+        <!-- Wave overlay -->
+        <div class="absolute bottom-0 left-0 right-0 h-8 bg-white" style="border-radius: 50% 50% 0 0 / 100% 100% 0 0;"></div>
       </div>
 
-      <div class="flex flex-col gap-1.5 px-6 pt-6">
-        <!-- Title -->
-        <h2 class="text-2xl font-semibold text-gray-900">Welcome back!</h2>
-        <p class="text-gray-400">Log in with your data that you entered during your registration.</p>
-        <!-- Error Message from Store -->
-        @if (authError$ | async; as error) {
-          <div class="alert alert-error font-semibold mt-2">
-            <span class="inline-flex items-center justify-center flex-shrink-0">
-              <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-[1lh] shrink-0 align-middle text-current leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
-            </span>
-            <span>{{ error }}</span>
-          </div>
-        }
-        <!-- Loading Indicator -->
-        @if (authLoading$ | async) {
-          <div class="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p class="text-sm text-blue-600">⏳ Logging in...</p>
-          </div>
-        }
-      </div>
+      <!-- Content Card -->
+      <div class="card flex-1 rounded-t-3xl -mt-6 relative z-10 w-full">
+        <div class="card-body mx-auto">
+          <h2 class="card-title text-2xl">Welcome back!</h2>
+          <p class="text-muted">Log in with your data that you entered during your registration.</p>
 
-      <!-- Form Section -->
-      <div class="flex flex-1 flex-col p-6 gap-2">
-        <!-- Register Form using Field Component -->
-        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
-          <!-- Dynamic Form Fields -->
-          @for (field of formFields; track field.name) {
-            <app-field
-              [required]="loginForm.get(field.name)?.hasValidator(Validators.required)"
-              [invalid]="loginForm.get(field.name)?.invalid && submitted"
-              [errorText]="getErrorMessage(field.name)"
-            >
-            <div class="relative isolate inline-flex justify-start gap-2 items-center">
-              <div class="pointer-events-none absolute z-[2] flex h-full items-center justify-center pl-3 text-gray-400">
+          <!-- Error Message -->
+          @if (authError$ | async; as error) {
+            <div class="alert alert-error alert-soft mb-4">
+              <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="size-5 shrink-0" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" x2="12" y1="8" y2="12"></line>
+                <line x1="12" x2="12.01" y1="16" y2="16"></line>
+              </svg>
+              <span>{{ error }}</span>
+            </div>
+          }
+
+          <!-- Loading Indicator -->
+          @if (authLoading$ | async) {
+            <div class="loading loading-xl text-primary mx-auto"></div>
+          }
+
+          <!-- Login Form -->
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-5 w-dvw max-w-md">
+            @for (field of formFields; track field.name) {
+              <div>
+                <label class="input input-lg input-soft validator w-full gap-4">
                   @if (field.name === 'password') {
-                    <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-[1lh] shrink-0 align-middle text-current leading-[1em]" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="16" r="1"></circle><rect x="3" y="10" width="18" height="12" rx="2"></rect><path d="M7 10V7a5 5 0 0 1 10 0v3"></path></svg>
+                    <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-6 min-h-lh shrink-0 align-middle text-current leading-[1em]" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="16" r="1"></circle><rect x="3" y="10" width="18" height="12" rx="2"></rect><path d="M7 10V7a5 5 0 0 1 10 0v3"></path></svg>
                   }
                   @else {
-                    <svg stroke="currentColor" fill="none" stroke-width="3" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-4 min-h-[1lh] shrink-0 align-middle text-current leading-[1em] rounded-sm outline-2" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M20 6 9 17l-5-5"></path></svg>
+                    <svg stroke="currentColor" fill="none" stroke-width="3" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-lh shrink-0 align-middle text-current leading-[1em] rounded-sm outline-2" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M20 6 9 17l-5-5"></path></svg>
                   }
+                  <input
+                    [type]="field.type"
+                    [formControlName]="field.name"
+                    [placeholder]="field.placeholder"
+                    [pattern]="field.pattern"
+                    [title]="field.title"
+                    required
+                  />
+                </label>
+                <p class="validator-hint mt-2">{{ field.title }}</p>
                 </div>
-                <input
-                  [type]="field.type"
-                  [formControlName]="field.name"
-                  [class]="
-                    cn(
-                      'input input-lg input-subtle pl-12 rounded-lg placeholder:text-gray-400',
-                      loginForm.get(field.name)?.invalid && 'focus-visible:outline-purple-500'
-                    )
-                  "
-                  [placeholder]="field.placeholder"
-                />
-              </div>
-            </app-field>
-          }
-          <!-- Forgot Password -->
-           <button
-           type="button"
-           class="button button-md button-ghost text-purple-500 font-semibold self-center rounded-lg"
-           >
-            Forgot Password
-           </button>
-          <!-- Spacer -->
-          <!-- Submit Button -->
-          <button
-            type="submit"
-            class="button button-lg button-solid bg-purple-600 rounded-lg font-semibold"
-          >
-            Log in
-          </button>
-        </form>
-        <!-- Sign In Link -->
-        <p class="text-center text-gray-400">
-          Don't have an account?
-          <a
-            routerLink="/auth/register"
-            class="button button-link align-baseline text-purple-600 font-semibold ml-1"
-          >
-            Sign up
-          </a>
-        </p>
+            }
+
+            <span class="tooltip tooltip-animated self-center -mt-2 text-muted cursor-default" data-tip="Coming soon - Feature not yet implemented">
+              <span class="text-primary font-semibold">Forgot password</span>
+            </span>
+
+            <button type="submit" class="btn btn-lg btn-primary">
+              Log in
+            </button>
+          </form>
+
+          <p class="text-center text-muted mt-5">
+            Don't have an account?
+            <a routerLink="/auth/register" class="btn btn-link text-primary align-baseline">Sign up</a>
+          </p>
+        </div>
       </div>
     </div>
   `,
@@ -134,32 +116,23 @@ export class LoginComponent implements OnInit {
       name: "email",
       type: "email",
       placeholder: "Email address",
+      pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+      title: "Please enter a valid email address",
     },
     {
       name: "password",
       type: "password",
       placeholder: "Password",
+      pattern: "^(?=.*[A-Z])(?=.*\\d).{8,}$",
+      title: "Password must be at least 8 characters and contain at least one uppercase letter and one digit",
     },
   ] as const;
 
-  // Reactive Form Group
+  // Reactive Form Group - using only required validator, pattern validation is handled by HTML5
   loginForm = this.fb.group(
     {
-      email: [
-        "",
-        [
-          Validators.required,
-          emailValidator(), // Custom email validator
-        ],
-      ],
-      password: [
-        "",
-        [
-          Validators.required,
-          Validators.minLength(8), // Minimum 8 characters
-          passwordValidator(), // Custom validator
-        ],
-      ],
+      email: ["", [Validators.required]],
+      password: ["", [Validators.required]],
     },
     {
       updateOn: "submit", // Only validate when form is submitted, not on every input change
@@ -173,26 +146,6 @@ export class LoginComponent implements OnInit {
         this.router.navigate(["/"]);
       }
     });
-  }
-
-  getErrorMessage(name: string): string | undefined {
-    const control = this.loginForm.get(name);
-    if (control?.hasError("required")) {
-      return `${name} is required`;
-    }
-    if (control?.hasError("invalidEmail")) {
-      const error = control.getError("invalidEmail");
-      return error.message || "Please enter a valid email address";
-    }
-    if (control?.hasError("minlength")) {
-      const requiredLength = control.getError("minlength").requiredLength;
-      return `Password must be at least ${requiredLength} characters`;
-    }
-    if (control?.hasError("invalidPassword")) {
-      const error = control.getError("invalidPassword");
-      return error.message || "Password must contain at least one uppercase letter and one digit";
-    }
-    return undefined;
   }
 
   /**
