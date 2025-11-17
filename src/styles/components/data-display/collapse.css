@@ -1,0 +1,245 @@
+@utility collapse {
+  --duration: 700ms;
+  display: grid;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  grid-template-rows: max-content 0fr;
+  grid-template-columns: minmax(0, 1fr);
+  isolation: isolate;
+  transition: grid-template-rows var(--duration) var(--tw-ease, cubic-bezier(0.4, 0, 0.2, 1));
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+
+  > input:is([type="checkbox"], [type="radio"]) {
+    grid-column-start: 1;
+    grid-row-start: 1;
+    appearance: none;
+    opacity: 0;
+  }
+
+  &:not(td, tr, colgroup) {
+    visibility: revert-layer;
+  }
+
+  &:is(
+      [open],
+      [tabindex]:focus:not(.collapse-close),
+      [tabindex]:focus-within:not(.collapse-close)
+    ),
+  &:not(.collapse-close):has(
+      > input:is([type="checkbox"], [type="radio"]):checked
+    ) {
+    grid-template-rows: max-content 1fr;
+  }
+
+  &:is(
+      [open],
+      [tabindex]:focus:not(.collapse-close),
+      [tabindex]:focus-within:not(.collapse-close)
+    )
+    > .collapse-content,
+  &:not(.collapse-close)
+    > :where(
+      input:is([type="checkbox"], [type="radio"]):checked ~ .collapse-content
+    ) {
+    content-visibility: visible;
+    min-height: fit-content;
+    @supports not (content-visibility: visible) {
+      visibility: visible;
+    }
+  }
+
+  &:not(.collapse-close) {
+    > input[type="checkbox"],
+    > input[type="radio"]:not(:checked),
+    > .collapse-title {
+      cursor: pointer;
+    }
+  }
+
+  &[tabindex]:focus:not(.collapse-close, .collapse[open]),
+  &[tabindex]:focus-within:not(.collapse-close, .collapse[open]) {
+    > .collapse-title {
+      cursor: unset;
+    }
+  }
+
+  &:is(
+      [open],
+      [tabindex]:focus:not(.collapse-close),
+      [tabindex]:focus-within:not(.collapse-close)
+    )
+    > :where(.collapse-content),
+  &:not(.collapse-close)
+    > :where(
+      input:is([type="checkbox"], [type="radio"]):checked ~ .collapse-content
+    ) {
+    padding-bottom: 1rem;
+  }
+
+  > input:is([type="checkbox"], [type="radio"]) {
+    z-index: 1;
+    width: 100%;
+    padding: 1rem;
+    padding-inline-end: 3rem;
+    min-height: 1lh;
+    transition: background-color 0.2s ease-out;
+  }
+
+  &:is([open]) {
+    &.collapse-arrow {
+      > .collapse-title:after {
+        @apply rotate-225;
+        translate: 0 -50%;
+        @media (prefers-reduced-motion: reduce) {
+          transition: none;
+        }
+      }
+    }
+  }
+
+  &.collapse-open {
+    &.collapse-arrow {
+      > .collapse-title:after {
+        @apply rotate-225;
+        translate: 0 -50%;
+        @media (prefers-reduced-motion: reduce) {
+          transition: none;
+        }
+      }
+    }
+  }
+
+  &[tabindex].collapse-arrow:focus:not(.collapse-close),
+  &.collapse-arrow[tabindex]:focus-within:not(.collapse-close) {
+    > .collapse-title:after {
+      @apply rotate-225;
+    }
+  }
+
+  &.collapse-arrow:not(.collapse-close) {
+    > input:is([type="checkbox"], [type="radio"]):checked
+      ~ .collapse-title:after {
+      translate: 0 -50%;
+    }
+  }
+
+  &[open] {
+    &.collapse-plus {
+      > .collapse-title:after {
+        @apply content-["−"];
+      }
+    }
+  }
+
+  &.collapse-open {
+    &.collapse-plus {
+      > .collapse-title:after {
+        @apply content-["−"];
+      }
+    }
+  }
+
+  &[tabindex].collapse-plus:focus:not(.collapse-close) {
+    > .collapse-title:after {
+      @apply content-["−"];
+    }
+  }
+
+  &.collapse-plus:not(.collapse-close) {
+    > input:is([type="checkbox"], [type="radio"]):checked
+      ~ .collapse-title:after {
+      @apply content-["−"];
+    }
+  }
+
+  &:is(details) {
+    width: 100%;
+    &::details-content {
+      @apply [interpolate-size:allow-keywords] h-0;
+      transition: all var(--duration)
+        var(--tw-ease, cubic-bezier(0.4, 0, 0.2, 1)) allow-discrete;
+      @media (prefers-reduced-motion: reduce) {
+        transition: none;
+      }
+    }
+
+    &:where([open])::details-content {
+      height: auto;
+    }
+    & summary {
+      position: relative;
+      display: block;
+      outline: none;
+
+      &::-webkit-details-marker {
+        display: none;
+      }
+    }
+
+    & > .collapse-content {
+      content-visibility: visible;
+    }
+  }
+}
+
+@utility collapse-content {
+  @apply px-4 min-h-0;
+  content-visibility: hidden;
+  grid-column-start: 1;
+  grid-row-start: 2;
+  cursor: unset;
+  @supports not (content-visibility: hidden) {
+    visibility: hidden;
+  }
+  transition: all var(--duration) var(--tw-ease, cubic-bezier(0.4, 0, 0.2, 1))
+    allow-discrete;
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+@utility collapse-arrow {
+  & > .collapse-title:after {
+    @apply content-[""] absolute top-1/2 end-[1.4rem] block h-2 w-2 rotate-45 pointer-events-none;
+    translate: 0 -100%;
+    transition: all var(--duration)
+      var(--tw-ease, cubic-bezier(0.4, 0, 0.2, 1));
+    transform-origin: 75% 75%;
+    box-shadow: 2px 2px;
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+  }
+}
+
+@utility collapse-plus {
+  > .collapse-title:after {
+    @apply content-["+"] absolute top-[0.9rem] end-[1.4rem] block h-2 w-2 pointer-events-none;
+    transition: all var(--duration)
+      var(--tw-ease, cubic-bezier(0.4, 0, 0.2, 1));
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+  }
+}
+
+@utility collapse-title {
+  @apply relative w-full p-4 pl-3 min-h-lh;
+  grid-column-start: 1;
+  grid-row-start: 1;
+  transition: background-color var(--duration) var(--tw-ease, var(--ease-out));
+}
+
+@utility collapse-open {
+  grid-template-rows: max-content 1fr;
+  & > .collapse-content {
+    @apply min-h-fit pb-4;
+    content-visibility: visible;
+    @supports not (content-visibility: visible) {
+      visibility: visible;
+    }
+  }
+}

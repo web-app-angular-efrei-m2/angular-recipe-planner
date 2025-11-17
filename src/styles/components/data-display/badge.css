@@ -1,0 +1,27 @@
+@utility badge {
+  @apply badge-md text-sm rounded-lg inline-flex items-center justify-center gap-1 align-middle tabular-nums whitespace-nowrap select-none font-semibold w-fit text-contrast border-current;
+}
+
+@utility badge-xs {
+  @apply text-2xs min-h-4 px-2;
+}
+
+@utility badge-sm {
+  @apply text-xs min-h-5 px-2.5;
+}
+
+@utility badge-md {
+  @apply text-sm min-h-6 px-3;
+}
+
+@utility badge-lg {
+  @apply text-sm min-h-7 px-3.5;
+}
+
+@utility badge-xl {
+  @apply text-md min-h-8 px-4;
+}
+
+@utility badge-subtle {
+  @apply text-bg;
+}

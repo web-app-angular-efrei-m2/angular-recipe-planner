@@ -1,0 +1,219 @@
+@layer components {
+  .dropdown {
+    @apply relative self-start;
+
+    &:is(details) {
+      @apply inline-block;
+      summary {
+        @apply marker:hidden cursor-pointer;
+      }
+      .dropdown-content {
+        transition-duration: var(--duration);
+      }
+      &::details-content {
+        @media (prefers-reduced-motion: no-preference) {
+          transition-property: content-visibility;
+          transition-behavior: allow-discrete;
+          transition-duration: var(--duration);
+        }
+      }
+    }
+
+    &[popover] {
+      @media (prefers-reduced-motion: no-preference) {
+        transition-property: display, overlay, content-visibility;
+        transition-behavior: allow-discrete;
+        transition-duration: var(--duration);
+      }
+    }
+
+    /* &:not(:hover, :focus-within) .dropdown-content,
+    [tabindex]:first-child:focus:not(:focus-visible) ~ .dropdown-content {
+      @apply hidden;
+    } */
+
+    .dropdown-content,
+    &[popover] {
+      @apply fixed;
+      @apply absolute z-999;
+    }
+
+    &[popover] {
+      /* biome-ignore lint/correctness/noUnknownProperty: <explanation> */
+      @supports not (position-area: bottom) {
+        @apply m-auto;
+
+        &::backdrop {
+          background-color: color-mix(in oklab, #000 30%, #0000);
+        }
+      }
+      top: anchor(bottom);
+      left: anchor(left);
+    }
+  }
+
+  /* Animated dropdown variant */
+  .dropdown-animate {
+    @media (prefers-reduced-motion: no-preference) {
+      @apply duration-700;
+      /* Opening animation */
+      &:is(:popover-open, :open) {
+        .dropdown-content,
+        &[popover] {
+          animation: dropdown-open var(--duration) var(--ease-bounce-out);
+        }
+      }
+
+      /* Closing animation */
+      &:not(:popover-open, :open) {
+        .dropdown-content,
+        &[popover] {
+          animation: dropdown-closed var(--duration) var(--ease-bounce-in-out);
+        }
+      }
+    }
+  }
+
+  .dropdown-top {
+    &[popover] {
+      @apply inset-[unset] bottom-[anchor(top)] left-[anchor(center)] translate-x-[-50%] origin-bottom;
+    }
+
+    .dropdown-content {
+      @apply inset-[unset] bottom-full left-[50%] translate-x-[-50%] origin-bottom;
+    }
+  }
+
+  .dropdown-top-start {
+    &[popover] {
+      @apply inset-[unset] bottom-[anchor(top)] left-[anchor(left)] origin-bottom-left;
+    }
+
+    .dropdown-content {
+      @apply inset-[unset] bottom-full left-0 origin-bottom-left;
+    }
+  }
+
+  .dropdown-top-end {
+    &[popover] {
+      @apply inset-[unset] bottom-[anchor(top)] right-[anchor(right)] origin-bottom-right;
+    }
+
+    .dropdown-content {
+      @apply inset-[unset] bottom-full right-0 origin-bottom-right;
+    }
+  }
+ 
+  .dropdown-bottom {
+    &[popover] {
+      @apply inset-[unset] top-[anchor(bottom)] left-[anchor(center)] translate-x-[-50%] origin-top;
+    }
+
+    .dropdown-content {
+      @apply inset-[unset] top-full left-[50%] translate-x-[-50%] origin-top;
+    }
+  }
+
+  .dropdown-bottom-start {
+    &[popover] {
+      @apply inset-[unset] top-[anchor(bottom)] left-[anchor(left)] origin-top-left;
+    }
+
+    .dropdown-content {
+      @apply inset-[unset] top-full left-0 origin-top-left;
+    }
+  }
+
+  .dropdown-bottom-end {
+    &[popover] {
+      @apply inset-[unset] top-[anchor(bottom)] right-[anchor(right)] origin-top-right;
+    }
+
+    .dropdown-content {
+      @apply inset-[unset] top-full right-0 origin-top-right;
+    }
+  }
+
+  .dropdown-left {
+    &[popover] {
+      @apply inset-[unset] right-[anchor(left)] top-[anchor(center)] translate-y-[-50%] origin-right;
+    }
+
+    .dropdown-content {
+      @apply inset-[unset] right-full top-[50%] translate-y-[-50%] origin-right;
+    }
+  }
+
+  .dropdown-left-start {
+    &[popover] {
+      @apply inset-[unset] right-[anchor(left)] top-[anchor(top)] origin-top-right;
+    }
+
+    .dropdown-content {
+      @apply inset-[unset] right-full top-0 origin-top-right;
+    }
+  }
+
+  .dropdown-left-end {
+    &[popover] {
+      @apply inset-[unset] right-[anchor(left)] bottom-[anchor(bottom)] origin-bottom-right;
+    }
+
+    .dropdown-content {
+      @apply inset-[unset] right-full bottom-0 origin-bottom-right;
+    }
+  }
+
+  .dropdown-right {
+    &[popover] {
+      @apply inset-[unset] left-[anchor(right)] top-[anchor(center)] translate-y-[-50%] origin-left;
+    }
+
+    .dropdown-content {
+      @apply inset-[unset] left-full top-[50%] translate-y-[-50%] origin-left;
+    }
+  }
+
+  .dropdown-right-start {
+    &[popover] {
+      @apply inset-[unset] left-[anchor(right)] top-[anchor(top)] origin-top-left;
+    }
+
+    .dropdown-content {
+      @apply inset-[unset] left-full top-0 origin-top-left;
+    }
+  }
+
+  .dropdown-right-end {
+    &[popover] {
+      @apply inset-[unset] left-[anchor(right)] bottom-[anchor(bottom)] origin-bottom-left;
+    }
+
+    .dropdown-content {
+      @apply inset-[unset] left-full bottom-0 origin-bottom-left;
+    }
+  }
+
+}
+
+@keyframes dropdown-open {
+  from {
+    opacity: 0;
+    transform: scale(0.25);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes dropdown-closed {
+  from {
+    /* opacity: 1; */
+    transform: scale(1);
+  }
+  to {
+    /* opacity: 0; */
+    transform: scale(0.25);
+  }
+}
