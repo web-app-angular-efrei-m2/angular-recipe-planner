@@ -1,59 +1,247 @@
-# AngularRecipePlanner
+# 🍳 Angular Recipe Planner
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.6.
+A modern, feature-rich recipe management application built with Angular 19, NgRx, and Tailwind CSS. Discover, save, and organize your favorite recipes with a beautiful, responsive interface.
 
-## Development server
+![Angular](https://img.shields.io/badge/Angular-19.x-red?style=flat-square&logo=angular)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?style=flat-square&logo=typescript)
+![NgRx](https://img.shields.io/badge/NgRx-18.x-purple?style=flat-square&logo=ngrx)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.x-38B2AC?style=flat-square&logo=tailwind-css)
 
-To start a local development server, run:
+## ✨ Features
 
+### 🔐 Authentication & User Management
+- User registration and login
+- Secure JWT-based authentication
+- Profile management and editing
+- Personalized user greetings
+
+### 🍽️ Recipe Management
+- Browse 50+ curated recipes with beautiful images
+- Detailed recipe pages with:
+  - Interactive image gallery
+  - Nutrition information
+  - Cooking instructions
+  - Ingredients list
+  - Difficulty level indicators
+- Real-time recipe ratings and reviews
+- Add and view recipe reviews
+
+### 🔍 Discovery & Search
+- Hierarchical category browsing
+- Filter recipes by:
+  - Cuisine type (Italian, Japanese, Mexican, etc.)
+  - Meal type (Breakfast, Lunch, Dinner, etc.)
+  - Cooking time
+  - Difficulty level
+  - Dietary preferences
+- Featured and trending recipes
+- Popular recipes section
+
+### ❤️ Bookmarks
+- Save favorite recipes
+- Quick access to bookmarked recipes
+- Visual bookmark indicators
+
+### 📱 Responsive Design
+- Mobile-first approach
+- Optimized for all screen sizes
+- Touch-friendly interfaces
+- Smooth animations and transitions
+
+### 🎨 Modern UI/UX
+- Clean, soft modern design
+- Glassmorphism effects
+- Smooth hover states
+- Loading and error states
+- Custom component design system
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v18 or higher)
+- pnpm (recommended) or npm
+
+### Installation
+
+1. Clone the repository:
 ```bash
-ng serve
+git clone https://github.com/web-app-angular-efrei-m2/angular-recipe-planner.git
+cd angular-recipe-planner
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
+2. Install dependencies:
 ```bash
-ng generate component component-name
+pnpm install
+# or
+npm install
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
+3. Start the JSON Server (API):
 ```bash
-ng generate --help
+pnpm api
+# or
+npm run api
 ```
 
-## Building
+The API will run on `http://localhost:3000`
 
-To build the project run:
-
+4. Start the development server:
 ```bash
-ng build
+pnpm start
+# or
+npm start
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+The application will open at `http://localhost:4200`
 
-## Running unit tests
+## 🛠️ Tech Stack
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+### Core
+- **Angular 19** - Modern web framework with signals and standalone components
+- **TypeScript 5** - Type-safe development
+- **RxJS** - Reactive programming
 
-```bash
-ng test
+### State Management
+- **NgRx** - Redux-inspired state management
+- **NgRx Effects** - Side effect management
+- **NgRx Signals** - Modern signal-based state access
+
+### Styling
+- **Tailwind CSS** - Utility-first CSS framework
+- **Custom Component Classes** - Reusable design system
+- **Responsive Design** - Mobile-first approach
+
+### Backend
+- **JSON Server** - Mock REST API for development
+- **Local Storage** - Client-side data persistence
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── core/
+│   │   ├── config/           # Application configuration
+│   │   ├── guards/           # Route guards
+│   │   ├── interceptors/     # HTTP interceptors
+│   │   ├── services/         # Core services
+│   │   └── state/            # NgRx state management
+│   │       ├── auth/         # Authentication state
+│   │       ├── recipes/      # Recipe state
+│   │       └── reviews/      # Review state
+│   ├── features/
+│   │   ├── auth/             # Login & Registration
+│   │   ├── bookmarks/        # Saved recipes
+│   │   ├── discover/         # Recipe discovery
+│   │   ├── profile/          # User profile
+│   │   └── recipes/          # Recipe management
+│   │       ├── recipe-list/
+│   │       ├── recipe-detail/
+│   │       └── recipe-review/
+│   └── shared/
+│       ├── components/       # Reusable components
+│       ├── directives/       # Custom directives
+│       ├── pipes/            # Custom pipes
+│       └── validators/       # Form validators
+├── styles/                   # Global styles & design system
+└── utils/                    # Utility functions
 ```
 
-## Running end-to-end tests
+## 🎯 Key Features Implementation
 
-For end-to-end (e2e) testing, run:
+### State Management with NgRx
+- Centralized state management for recipes, reviews, and authentication
+- Efficient data loading with effects
+- Memoized selectors for optimal performance
+
+### Signals Integration
+- Modern Angular signals for reactive UI
+- `selectSignal()` for direct store access
+- Computed signals for derived state
+
+### Custom Directives
+- `SafeHtmlDirective` - Secure HTML rendering for SVG icons
+
+### Custom Pipes
+- `DifficultyLevelPipe` - Recipe difficulty display
+- `RatingPipe` - Review rating calculations and formatting
+
+### Responsive Design
+- Breakpoint-based styling (sm, md, lg)
+- Touch-optimized interactions
+- Adaptive layouts and typography
+
+## 🧪 Available Scripts
 
 ```bash
-ng e2e
+# Development
+pnpm start          # Start dev server
+pnpm api            # Start JSON server
+
+# Building
+pnpm build          # Production build
+pnpm build:dev      # Development build
+
+# Testing
+pnpm test           # Run unit tests
+pnpm test:headless  # Run tests in headless mode
+
+# Code Quality
+pnpm lint           # Run linter
+pnpm format         # Format code with Biome
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## 📊 Database
 
-## Additional Resources
+The application uses JSON Server with a `db.json` file containing:
+- 50 recipes with images and detailed information
+- 74 recipe reviews with ratings
+- 4 sample users
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## 🎨 Design System
+
+The project includes a custom design system with:
+- Button variants (primary, secondary, ghost, link)
+- Form components (input, checkbox, toggle)
+- Card components
+- Alert states (info, success, warning, error)
+- Loading states
+- Navigation components
+
+## 🔒 Authentication
+
+- JWT-based authentication
+- Protected routes with auth guards
+- Automatic token management
+- HTTP interceptors for API calls
+
+## 📝 Future Enhancements
+
+🚧 **More features coming soon!** This project is currently in its first phase. Stay tuned for:
+
+- Recipe creation and editing
+- Advanced search with filters
+- Recipe collections
+- Social features (follow chefs, share recipes)
+- Meal planning
+- Shopping list generation
+- Recipe import from URLs
+- Dark mode
+- Internationalization (i18n)
+- Progressive Web App (PWA) features
+
+## 🤝 Contributing
+
+This project is part of an academic program. Contributions, issues, and feature requests are welcome!
+
+## 🙏 Acknowledgments
+
+- Angular team for the amazing framework
+- NgRx team for state management
+- Tailwind CSS for the utility-first approach
+- Unsplash for recipe images
+
+---
+
+**Built with ❤️ using Angular 19**
