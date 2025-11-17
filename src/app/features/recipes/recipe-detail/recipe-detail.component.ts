@@ -26,10 +26,10 @@ import { cn } from "@/utils/classes";
       <div class="relative flex flex-1 flex-col h-full">
       <!-- navigation buttons  -->
       <div class="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-6">
-        <button type="button" (click)="goBack()" class="btn btn-sm sm:btn-md rounded-full p-0 bg-white border-0 shadow-sm hover:shadow-md">
+        <button type="button" (click)="goBack()" class="btn btn-sm sm:btn-md rounded-full aspect-square bg-white border-0 shadow-sm hover:shadow-md">
           <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-4 sm:size-5 min-h-lh shrink-0 align-middle text-current leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
         </button>
-        <button type="button" (click)="toggleBookmark()" [class]="cn('btn btn-sm sm:btn-md rounded-full p-0 border-0 shadow-sm hover:shadow-md transition-colors', isBookmarked() ? 'bg-red-100 text-red-500' : 'bg-white text-gray-500')">
+        <button type="button" (click)="toggleBookmark()" [class]="cn('btn btn-sm sm:btn-md rounded-full aspect-square border-0 shadow-sm hover:shadow-md transition-colors', isBookmarked() ? 'bg-red-100 text-red-500' : 'bg-white text-gray-500')">
           <svg stroke="currentColor" [attr.fill]="isBookmarked() ? 'currentColor' : 'none'" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-4 sm:size-5 min-h-lh shrink-0 align-middle text-current leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg>
         </button>
       </div>
@@ -116,10 +116,10 @@ import { cn } from "@/utils/classes";
                    <span class="text-gray-800">Dianne Russel</span>
                    <span>Chef</span>
                  </div>
-                 <button type="button" class="btn btn-xs sm:btn-sm rounded-full p-0 bg-gray-100 border-0 text-purple-500">
+                 <button type="button" class="btn btn-xs sm:btn-sm rounded-full aspect-square bg-gray-100 border-0 text-purple-500">
                    <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-3 sm:size-4 min-h-lh shrink-0 align-middle text-current leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M8 10h.01"></path><path d="M12 10h.01"></path><path d="M16 10h.01"></path></svg>
                  </button>
-                 <button type="button" class="btn btn-xs sm:btn-sm rounded-full p-0 bg-gray-100 border-0 text-purple-500">
+                 <button type="button" class="btn btn-xs sm:btn-sm rounded-full aspect-square bg-gray-100 border-0 text-purple-500">
                    <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-3 sm:size-4 min-h-lh shrink-0 align-middle text-current leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
                  </button>
                </div>
