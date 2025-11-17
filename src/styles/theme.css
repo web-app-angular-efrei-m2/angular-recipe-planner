@@ -168,6 +168,22 @@
   --text-7xl--line-height: 5.75rem;
   --text-7xl--letter-spacing: -0.025em;
 
+  /* Sizes */
+  --size-3xs: 14rem;
+  --size-2xs: 16rem;
+  --size-xs: 20rem;
+  --size-sm: 24rem;
+  --size-md: 28rem;
+  --size-lg: 32rem;
+  --size-xl: 36rem;
+  --size-2xl: 42rem;
+  --size-3xl: 48rem;
+  --size-4xl: 56rem;
+  --size-5xl: 64rem;
+  --size-6xl: 72rem;
+  --size-7xl: 80rem;
+  --size-8xl: 90rem;
+
   /* Font Weights */
   --font-weight-thin: 100;
   --font-weight-extralight: 200;
@@ -218,6 +234,7 @@
   /* Shadows */
   --shadow-xs: 0 1px 2px var(--color-shadow-10),0 0 1px var(--color-shadow-30);
   --shadow-sm: 0 2px 4px var(--color-shadow-10),0 0 1px var(--color-shadow-30);
+  --shadow-sm: 0 2px 4px var(--color-shadow-10),0 0 1px var(--color-shadow-30);
   --shadow-md: 0 4px 8px var(--color-shadow-10), 0 0 1px var(--color-shadow-30);
   --shadow-lg: 0 8px 16px var(--color-shadow-10),0 0 1px var(--color-shadow-30);
   --shadow-xl: 0 16px 24px var(--color-shadow-10),0 0 1px var(--color-shadow-30);
@@ -255,11 +272,38 @@
   --aspect-ultra-wide: 18 / 5;
   --aspect-golden: 1.618 / 1;
 
+  /* Z-Index */
+  --z-hide: -1;
+  --z-base: 0;
+  --z-docked: 10;
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-banner: 1200;
+  --z-overlay: 1300;
+  --z-modal: 1400;
+  --z-popover: 1500;
+  --z-skipNav: 1600;
+  --z-toast: 1700;
+  --z-tooltip: 1800;
+  --z-max: 2147483647;
+
   /* Transition Timing Functions */
   --ease-in: cubic-bezier(0.42, 0, 1, 1);
   --ease-out: cubic-bezier(0, 0, 0.58, 1);
   --ease-in-out: cubic-bezier(0.42, 0, 0.58, 1);
   --ease-in-smooth: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-out-sharp: cubic-bezier(0, 0, 0.2, 1);
+  --ease-bounce-out: cubic-bezier(0.66,-0.01,0.15,1.57);
+  --ease-bounce-in-out: cubic-bezier(0.29,-0.81,0.67,1.69);
+
+  /* Transition Durations */
+  --duration-slowest: 500ms;
+  --duration-slower: 400ms;
+  --duration-slow: 300ms;
+  --duration-moderate: 200ms;
+  --duration-fast: 150ms;
+  --duration-faster: 100ms;
+  --duration-fastest: 50ms;
 
   /** Animations */
   --animate-spin: spin 1s linear infinite;
@@ -267,6 +311,8 @@
   --animate-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-bounce: bounce 1s infinite;
   --animate-shine: shine 5s ease-in-out infinite;
+  --animate-fade-in: fade-in 0.3s ease-in forwards;
+  --animate-fade-out: fade-out 0.3s ease-out forwards;
 
   /* Keyframes */
   @keyframes spin {
@@ -303,6 +349,26 @@
     }
     100% {
       background-position: 200% 0;
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+      display: block;
+    }
+    to {
+      opacity: 0;
+      display: none;
     }
   }
 }

@@ -1,0 +1,265 @@
+@utility tooltip-* {
+  --tt-bg: --alpha(--value(--color- *) / --modifier(integer) %);
+
+  > .tooltip-content,
+  &[data-tip]:before {
+    @apply color-contrast-(--tt-bg);
+  }
+}
+
+@utility tooltip-* {
+  --tt-bg: --value(--color- *);
+}
+
+@utility tooltip-offset-* {
+  --tt-pos: --value([ *]);
+  --tt-pos: calc(var(--spacing) * --value(number));
+}
+
+@utility tooltip {
+  @apply relative inline-block self-start;
+  --tt-bg: var(--color-neutral);
+  --tt-off: calc(100% + 0.25rem - 1px);
+  --tt-tail: calc(100% + 0.25rem);
+  --tt-pos: 0.25rem;
+  --duration: 0ms;
+  --mask-tooltip: url("data:image/svg+xml,%3Csvg width='10' height='4' viewBox='0 0 8 4' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0.500009 1C3.5 1 3.00001 4 5.00001 4C7 4 6.5 1 9.5 1C10 1 10 0.499897 10 0H0C-1.99338e-08 0.5 0 1 0.500009 1Z' fill='black'/%3E%3C/svg%3E%0A");
+
+  &[data-tip]:before {
+    @apply rounded-sm absolute max-w-80 px-2 py-1 text-center whitespace-normal invisible;
+    content-visibility: hidden;
+    font-size: 0.875rem;
+    line-height: 1.25;
+    color: var(--color-contrast, var(--color-neutral-content));
+    background-color: var(--tt-bg);
+    width: max-content;
+    pointer-events: none;
+    z-index: 2;
+    --tw-content: attr(data-tip);
+    content: var(--tw-content);
+    @apply inset-[unset] left-[50%] origin-bottom;
+    bottom: calc(var(--tt-off) + var(--tt-pos, -0.25rem));
+    translate: -50% 0;
+    transition: all var(--duration, 700ms)
+      var(--tw-ease, cubic-bezier(0.4, 0, 0.2, 1)) allow-discrete;
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+  }
+
+  &[data-tip]:after {
+    @apply absolute invisible;
+    content-visibility: hidden;
+    background-color: var(--tt-bg);
+    content: "";
+    pointer-events: none;
+    width: 0.625rem;
+    height: 0.25rem;
+    display: block;
+    mask-repeat: no-repeat;
+    mask-position: -1px 0;
+    mask-image: var(--mask-tooltip);
+    @apply inset-[unset] left-[50%] origin-bottom rotate-0;
+    bottom: calc(var(--tt-tail) - 0.25rem + var(--tt-pos, -0.25rem));
+    translate: calc(-50% + 0.125rem - 1px) 0;
+    transition-property: all;
+    transition-behavior: allow-discrete;
+    transition-duration: var(--duration);
+    transition-timing-function: var(--tw-ease, var(--ease-bounce-in-out));
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+  }
+
+  &:is([data-tip]:not([data-tip=""]), :has(.tooltip-content:not(:empty))) {
+    &:hover,
+    &:has(:focus-visible) {
+      & > .tooltip-content,
+      &[data-tip]:before,
+      &[data-tip]:after {
+        @apply visible;
+        content-visibility: visible;
+        transition-delay: var(--delay, 0ms);
+      }
+    }
+  }
+}
+
+@utility tooltip-content {
+  @apply rounded-sm absolute max-w-80 px-2 py-1 text-center whitespace-normal invisible;
+  content-visibility: hidden;
+  font-size: 0.875rem;
+  line-height: 1.25;
+  color: var(--color-contrast, var(--color-neutral-content));
+  background-color: var(--tt-bg);
+  width: max-content;
+  z-index: 2;
+  pointer-events: none;
+  @apply inset-[unset] left-[50%] origin-bottom;
+  bottom: calc(var(--tt-off) + var(--tt-pos, -0.25rem));
+  translate: -50% 0;
+  transition-property: all;
+  transition-behavior: allow-discrete;
+  transition-duration: var(--duration);
+  transition-timing-function: var(--tw-ease, var(--ease-bounce-in-out));
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+
+  &:after {
+    @apply absolute;
+    background-color: var(--tt-bg);
+    content: "";
+    pointer-events: none;
+    width: 0.625rem;
+    height: 0.25rem;
+    display: block;
+    mask-repeat: no-repeat;
+    mask-position: -1px 0;
+    mask-image: var(--mask-tooltip);
+    @apply rotate-0;
+    --tt-tail: calc(1px - 0.25rem);
+    inset: auto auto var(--tt-tail) 50%;
+    translate: calc(-50% + 0.125rem - 1px) 0;
+  }
+}
+
+@utility tooltip-open {
+  &:is([data-tip]:not([data-tip=""]), :has(.tooltip-content:not(:empty))) {
+    & > .tooltip-content,
+    &[data-tip]:before,
+    &[data-tip]:after {
+      @apply visible;
+      content-visibility: visible;
+    }
+  }
+}
+
+@utility tooltip-interactive {
+  &:is([data-tip]:not([data-tip=""]), :has(.tooltip-content:not(:empty))) {
+    & > .tooltip-content,
+    &[data-tip]:before,
+    &[data-tip]:after {
+      transition-delay: 200ms;
+      pointer-events: auto;
+      &:hover {
+        @apply visible;
+        content-visibility: visible;
+      }
+    }
+  }
+}
+
+@utility tooltip-animated {
+  --duration: 700ms;
+  /* Opening animation */
+  &.tooltip-open,
+  &:hover,
+  &:has(:focus-visible) {
+    & > .tooltip-content,
+    &[data-tip]:before,
+    &[data-tip]:after {
+      @apply scale-100;
+    }
+  }
+
+  /* Closing animation */
+  &:not(:hover):not(.tooltip-open) {
+    & > .tooltip-content,
+    &[data-tip]:before,
+    &[data-tip]:after {
+      @apply scale-0;
+    }
+  }
+}
+
+@utility tooltip-top {
+  & > .tooltip-content,
+  &[data-tip]:before {
+    @apply inset-[unset] left-[50%] origin-bottom;
+    bottom: calc(var(--tt-off) + var(--tt-pos, -0.25rem));
+    translate: -50% 0;
+
+    &:after {
+      @apply rotate-0;
+      --tt-tail: calc(1px - 0.25rem);
+      inset: auto auto var(--tt-tail) 50%;
+      translate: calc(-50% + 0.125rem + 1px) 0;
+    }
+  }
+
+  &[data-tip]:after {
+    @apply inset-[unset] left-[50%] origin-bottom rotate-0;
+    bottom: calc(var(--tt-tail) - 0.25rem + var(--tt-pos, -0.25rem));
+    translate: calc(-50% + 0.125rem - 1px) 0;
+  }
+}
+
+@utility tooltip-bottom {
+  & > .tooltip-content,
+  &[data-tip]:before {
+    @apply inset-[unset] left-[50%] origin-top;
+    top: calc(var(--tt-off) + var(--tt-pos, -0.25rem));
+    translate: -50% 0;
+
+    &:after {
+      @apply rotate-180;
+      --tt-tail: calc(1px - 0.25rem);
+      inset: var(--tt-tail) auto auto 50%;
+      translate: calc(-50% - 0.125rem - 1px) 0;
+    }
+  }
+
+  &[data-tip]:after {
+    @apply inset-[unset] left-[50%] origin-top rotate-180;
+    top: calc(var(--tt-tail) + var(--tt-pos, -0.25rem));
+    translate: calc(-50% + 0.125rem - 1px) 0;
+  }
+}
+
+@utility tooltip-left {
+  > .tooltip-content,
+  &[data-tip]:before {
+    @apply inset-[unset] top-[50%] origin-right;
+    right: calc(var(--tt-off) + var(--tt-pos, 0.25rem));
+    translate: 0 -50%;
+
+    &:after {
+      @apply rotate-270;
+      --tt-tail: calc(2px - 0.5rem);
+      inset: 50% var(--tt-tail) auto auto;
+      translate: 0 calc(-50% - 0.25rem + 1px);
+    }
+  }
+
+  &[data-tip]:after {
+    @apply inset-[unset] top-[50%] origin-right rotate-270;
+    right: calc(var(--tt-tail) - 2px + var(--tt-pos, 0.25rem));
+    translate: 0 calc(-50% - 0.25rem - 1px);
+  }
+}
+
+@utility tooltip-right {
+  > .tooltip-content,
+  &[data-tip]:before {
+    @apply inset-[unset] top-[50%] origin-left;
+    left: calc(var(--tt-off) + var(--tt-pos, -0.25rem));
+    translate: 0 -50%;
+
+    &:after {
+      @apply rotate-90;
+      --tt-tail: calc(2px - 0.5rem);
+      inset: 50% auto auto var(--tt-tail);
+      translate: 0 -50%;
+    }
+  }
+
+  &[data-tip]:after {
+    @apply inset-[unset] top-[50%] origin-right rotate-90;
+    left: calc(var(--tt-tail) - 0.75rem + var(--tt-pos, 0.25rem));
+    translate: 0 calc(-50% + 0.25rem + 1px);
+  }
+}

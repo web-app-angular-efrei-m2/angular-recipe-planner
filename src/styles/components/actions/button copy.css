@@ -1,0 +1,85 @@
+:where(.btn) {
+  @layer components {
+    width: unset;
+  }
+}
+
+@utility btn-* {
+  @apply color-contrast-(--alert-color);
+  --alert-border: --value(--color- *, [ *]);
+  --alert-color: --value(--color- *, [ *]);
+}
+
+
+@utility btn {
+  @apply inline-flex appearance-none items-center justify-center select-none relative whitespace-nowrap align-middle cursor-pointer shrink-0 isolate font-semibold transition-colors duration-300 flex-nowrap text-center ease-out rounded-sm disabled:opacity-60 disabled:pointer-events-none touch-manipulation;
+
+  color: var(--btn-fg);
+  outline-color: var(--btn-color, var(--color-base-content));
+  background-color: var(--btn-bg);
+  border-color: var(--btn-border);
+
+  --btn-border: color-mix(in oklab, var(--bg-currentcolor), #000 5%);
+  --btn-shadow: 0 3px 2px -2px color-mix(in oklab, var(--bg-currentcolor) 30%, #0000), 0 4px 3px -2px color-mix(in oklab, var(--bg-currentcolor) 30%, #0000);
+
+  &:active:not(:disabled) {
+    translate: 0 0.5px;
+    --btn-shadow: "";
+  }
+
+  &:is(input[type="checkbox"], input[type="radio"]) {
+    @apply appearance-none;
+
+    &::after {
+      @apply content-[attr(aria-label)];
+    }
+  }
+}
+@utility btn-2xs {
+  @apply h-6 min-w-6 gap-1 px-2 text-xs;
+}
+
+@utility btn-xs {
+  @apply h-8 min-w-8 gap-1 px-2.5 text-xs;
+}
+
+@utility btn-sm {
+  @apply h-9 min-w-9 gap-2 px-3.5 text-sm;
+}
+
+@utility btn-md {
+  @apply h-10 min-w-10 gap-2 px-4 text-md;
+}
+
+@utility btn-lg {
+  @apply h-11 min-w-11 gap-3 px-5 text-md;
+}
+
+@utility btn-xl {
+  @apply h-12 min-w-12 gap-2.5 px-5 text-lg;
+}
+
+@utility btn-link {
+  @apply h-auto min-w-0 rounded-xs p-0 decoration-current/20 underline-offset-3 hover:underline active:opacity-85;
+}
+
+@utility btn-ghost {
+  @apply border border-transparent hover:btn-solid;
+}
+
+@utility btn-outline {
+  @apply border border-current hover:btn-solid;
+}
+
+@utility btn-subtle {
+  @apply bg-neutral/8 text-bg border border-transparent hover:btn-solid;
+}
+
+@utility btn-solid {
+  @apply bg-neutral text-contrast shadow-(--btn-shadow) border border-(--btn-border);
+   @media (hover: hover) {
+    &:hover {
+      background-color: --alpha(var(--bg-color) / 90%);
+    }
+   }
+}
