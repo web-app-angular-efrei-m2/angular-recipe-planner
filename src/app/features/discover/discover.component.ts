@@ -1,6 +1,5 @@
 import { Component, effect, inject, type OnDestroy, type OnInit, signal } from "@angular/core";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
-import { DomSanitizer } from "@angular/platform-browser";
 import { Router } from "@angular/router";
 import { Store } from "@ngrx/store";
 import { CATEGORY_GROUPS } from "@/app/core/config/categories.config";
@@ -8,6 +7,7 @@ import { loadRecipes } from "@/app/core/state/recipes/recipes.actions";
 import { selectAllRecipes, selectPopularRecipes, selectRecipesLoading, selectTrendingRecipes } from "@/app/core/state/recipes/recipes.selectors";
 import { loadReviewsByRecipeId } from "@/app/core/state/reviews/reviews.actions";
 import { selectAreReviewsLoadedForRecipe } from "@/app/core/state/reviews/reviews.selectors";
+import { SafeHtmlDirective } from "@/app/shared/directives/safe-html.directive";
 
 /**
  * ENHANCED DISCOVER COMPONENT WITH HIERARCHICAL CATEGORIES
@@ -25,7 +25,7 @@ import { selectAreReviewsLoadedForRecipe } from "@/app/core/state/reviews/review
 @Component({
   selector: "app-discover-enhanced",
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, SafeHtmlDirective],
   template: `
     <div class="min-h-screen flex flex-1 flex-col wrap-break-word rounded-sm p-0 text-start font-semibold">
 
@@ -83,7 +83,7 @@ import { selectAreReviewsLoadedForRecipe } from "@/app/core/state/reviews/review
                 class="collapse-title text-gray-400">
                <div class="flex items-center gap-3">
                  <!-- Icon -->
-                <span class="text-gray-400" [innerHTML]="sanitizeHtml(group.icon)"></span>
+                <span class="text-gray-400" [appSafeHtml]="group.icon"></span>
                 <!-- Category Name -->
                 <span class="text-sm font-medium mr-auto text-gray-800">{{ group.name }}</span>
                </div>
@@ -119,7 +119,6 @@ import { selectAreReviewsLoadedForRecipe } from "@/app/core/state/reviews/review
 export class DiscoverComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private fb = inject(FormBuilder);
-  private sanitizer = inject(DomSanitizer);
   private readonly store = inject(Store);
 
   // Category configuration
@@ -243,12 +242,5 @@ export class DiscoverComponent implements OnInit, OnDestroy {
         queryParams: { q: query },
       });
     }
-  }
-
-  /**
-   * Sanitize HTML for SVG icons
-   */
-  protected sanitizeHtml(html: string) {
-    return this.sanitizer.bypassSecurityTrustHtml(html);
   }
 }

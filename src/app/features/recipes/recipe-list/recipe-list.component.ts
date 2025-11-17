@@ -1,5 +1,4 @@
 import { Component, computed, effect, inject, type OnDestroy, type OnInit } from "@angular/core";
-import { DomSanitizer } from "@angular/platform-browser";
 import { RouterLink } from "@angular/router";
 import { Store } from "@ngrx/store";
 import { CATEGORY_GROUPS } from "@/app/core/config/categories.config";
@@ -8,13 +7,14 @@ import { loadRecipes } from "@/app/core/state/recipes/recipes.actions";
 import { selectAllRecipes, selectRecipesByPopularity, selectRecipesError, selectRecipesLoading } from "@/app/core/state/recipes/recipes.selectors";
 import { loadReviewsByRecipeId } from "@/app/core/state/reviews/reviews.actions";
 import { selectAreReviewsLoadedForRecipe, selectReviewsByRecipeMap } from "@/app/core/state/reviews/reviews.selectors";
+import { SafeHtmlDirective } from "@/app/shared/directives/safe-html.directive";
 import { DifficultyLevelPipe } from "@/app/shared/pipes/difficulty-level.pipe";
 import { RatingPipe } from "@/app/shared/pipes/rating.pipe";
 import { cn } from "@/utils/classes";
 
 @Component({
   selector: "app-recipe-list",
-  imports: [RouterLink, DifficultyLevelPipe, RatingPipe],
+  imports: [RouterLink, DifficultyLevelPipe, RatingPipe, SafeHtmlDirective],
   template: `
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl font-semibold text-gray-400">
       <!-- greeting -->
@@ -51,28 +51,36 @@ import { cn } from "@/utils/classes";
           }
         </div>
       </div>
-      <!-- Loading State using Signal ⭐⭐⭐ -->
+      <!-- Loading State using Signal  -->
       @if (loading()) {
         <div class="flex items-center justify-center py-12 sm:py-16">
           <div class="text-center">
-            <div class="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-4 border-orange-200 border-t-orange-500 mx-auto mb-4"></div>
-            <span class="text-gray-600 text-base sm:text-lg">Loading delicious recipes...</span>
+            <span class="loading loading-lg text-orange-500"></span>
+            <p class="text-gray-600 text-base sm:text-lg mt-4">Loading delicious recipes...</p>
           </div>
         </div>
       }
 
       <!-- Error State -->
       @if (error()) {
-        <div class="p-4 sm:p-6 bg-red-50 border-2 border-red-200 rounded-2xl shadow-sm">
-          <div class="flex items-start gap-3">
-            <span class="text-2xl sm:text-3xl">❌</span>
-            <div>
-              <h3 class="font-semibold text-red-900 mb-1 text-sm sm:text-base">Oops! Something went wrong</h3>
-              <p class="text-red-600 text-xs sm:text-sm">{{ error() }}</p>
+        <div class="flex flex-col items-center justify-center py-8 sm:py-12">
+          <div class="card alert alert-soft alert-error border w-full max-w-md mx-4">
+            <div class="card-body text-center w-full">
+              <span class="text-4xl sm:text-5xl mb-3">❌</span>
+              <h3 class="card-title font-bold justify-center mb-2 text-sm sm:text-base">Oops! Something went wrong</h3>
+              <p class="text-xs sm:text-sm mb-4">{{ error() }}</p>
+              <button
+                routerLink="/recipes"
+                class="tooltip tooltip-animated tooltip-neutral btn btn-md sm:btn-lg btn-error rounded-lg cursor-default w-full"
+                data-tip="Coming soon - Feature not yet implemented"
+              >
+                Try Again
+              </button>
             </div>
           </div>
         </div>
       }
+
       @if (!loading() && recipes().length > 0) {
         <!-- categories -->
         <div class="flex flex-1 flex-col wrap-break-word text-start">
@@ -88,7 +96,7 @@ import { cn } from "@/utils/classes";
               [queryParams]="{ filter: group.subcategories[0].filterKey, value: group.subcategories[0].filterValue }"
               class="inline-flex items-center gap-1.5 sm:gap-2 shrink-0 rounded-2xl tabular-nums whitespace-nowrap select-none px-3 sm:px-4 min-h-7 sm:min-h-8 text-xs sm:text-sm bg-gray-100 text-contrast snap-start"
               >
-                <span class="text-gray-400 text-sm sm:text-base" [innerHTML]="sanitizeHtml(group.icon)"></span>
+                <span class="text-gray-400 text-sm sm:text-base" [appSafeHtml]="group.icon"></span>
                 <span>{{ group.name }}</span>
               </a>
             }
@@ -152,7 +160,6 @@ import { cn } from "@/utils/classes";
 })
 export class RecipeListComponent implements OnInit, OnDestroy {
   private readonly store = inject(Store);
-  private sanitizer = inject(DomSanitizer);
 
   protected readonly cn = cn;
 
@@ -222,12 +229,5 @@ export class RecipeListComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     // If you had manual effects, you would clean them up here
     this.loadReviewsEffect.destroy();
-  }
-
-  /**
-   * Sanitize HTML for SVG icons
-   */
-  protected sanitizeHtml(html: string) {
-    return this.sanitizer.bypassSecurityTrustHtml(html);
   }
 }
