@@ -27,112 +27,92 @@ import { selectAreReviewsLoadedForRecipe } from "@/app/core/state/reviews/review
   standalone: true,
   imports: [ReactiveFormsModule],
   template: `
-    <div class="min-h-screen flex flex-1 flex-col break-words rounded-sm p-0 text-start font-semibold">
+    <div class="min-h-screen flex flex-1 flex-col wrap-break-word rounded-sm p-0 text-start font-semibold">
 
       <!-- Header -->
-      <div class="sticky inset-0 z-10 flex items-center justify-center shrink-0 h-[var(--header-height)] px-6 pt-0 bg-white">
+      <div class="sticky inset-0 z-10 flex items-center justify-center shrink-0 h-(--header-height) px-6 pt-0 bg-white">
         <h2 class="text-2xl font-semibold text-gray-800">Discover</h2>
       </div>
 
-      <!-- Search Bar -->
-      <form [formGroup]="searchQueryForm" (ngSubmit)="onSubmit()" class="flex flex-col break-words text-start px-6 py-4">
-      <div class="relative isolate inline-flex justify-start gap-2 items-center">
-        <div class="pointer-events-none absolute  left-0 z-[2] flex h-full items-center justify-center pl-3 text-gray-400">
-          <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-[1lh] shrink-0 align-middle text-current leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
-        </div>
-        <input
-          type="text"
-          formControlName="query"
-          class="input input-lg input-subtle pl-12 pr-15 rounded-lg placeholder:text-gray-400 focus-visible:outline-purple-500"
-          placeholder="Search Any Recipe..."
-        />
-        <div class="absolute right-0 z-[2] flex h-full items-center justify-center text-gray-400 ">
-          <button class="button button-md button-ghost rounded-l-none rounded-lg border-l size-full">
-            <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-[1lh] shrink-0 align-middle text-current leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="M20 7h-9"></path><path d="M14 17H5"></path><circle cx="17" cy="17" r="3"></circle><circle cx="7" cy="7" r="3"></circle></svg>
-          </button>
-        </div>
-      </div>
-      </form>
+      <div class="max-w-5xl mx-auto w-dvw">
+        <!-- Search Bar -->
+        <form [formGroup]="searchQueryForm" (ngSubmit)="onSubmit()" class="flex flex-col wrap-break-word text-start px-6 py-4">
+          <label class="input input-lg input-soft rounded-lg pr-0 w-full">
+            <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-lh shrink-0 align-middle text-current leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+            <input
+              type="text"
+              formControlName="query"
+              class="placeholder:text-gray-400 focus-visible:outline-primary"
+              placeholder="Search Any Recipe..."
+            />
+            <button type="button" class="tooltip tooltip-left tooltip-animated btn btn-md btn-ghost rounded-l-none rounded-lg border-l h-full cursor-default" data-tip="Coming soon - Feature not yet implemented">
+              <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-lh shrink-0 align-middle text-current leading-[1em]" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="M20 7h-9"></path><path d="M14 17H5"></path><circle cx="17" cy="17" r="3"></circle><circle cx="7" cy="7" r="3"></circle></svg>
+            </button>
+          </label>
+        </form>
 
-      <!-- Popular Chefs Section -->
-      <div class="px-6 py-4">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="text-sm text-gray-800 font-semibold">Popular Chefs</h3>
-          <button class="button button-link text-purple-500 text-sm">See all</button>
-        </div>
-        <div class="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-          @for (chef of popularChefs(); track chef.id) {
-            <div class="flex flex-col items-center gap-2 min-w-[80px]">
-              <div class="w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center shadow-md">
-                <span class="text-white text-xl font-bold">{{ chef.initials }}</span>
+        <!-- Popular Chefs Section -->
+        <div class="px-6 py-4">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm text-gray-800 font-semibold">Popular Chefs</h3>
+            <button type="button" class="btn btn-link text-purple-500 text-sm">See all</button>
+          </div>
+          <div class="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+            @for (chef of popularChefs(); track chef.id) {
+              <div class="flex flex-col items-center gap-2 min-w-20">
+                <div class="avatar avatar-placeholder">
+                  <div class="w-16 rounded-full bg-linear-to-br from-purple-400 to-pink-400 text-white shadow-md">
+                  <span class="text-xl font-bold">{{ chef.initials }}</span>
+                </div>
+                </div>
+                <span class="text-xs text-gray-700 text-center font-medium">{{ chef.name }}</span>
               </div>
-              <span class="text-xs text-gray-700 text-center font-medium">{{ chef.name }}</span>
-            </div>
+            }
+          </div>
+        </div>
+
+        <!-- Hierarchical Categories Section -->
+        <div class="flex flex-col">
+          <div class="sticky top-(--header-height) z-10 px-6 py-3 bg-white">
+            <h3 class="text-sm text-gray-800 font-semibold">Categories</h3>
+          </div>
+          <!-- Category Groups -->
+          @for (group of categoryGroups; track group.id) {
+            <details class="collapse collapse-arrow border-y-2 border-transparent open:border-(--color-border)">
+              <summary
+                class="collapse-title text-gray-400">
+               <div class="flex items-center gap-3">
+                 <!-- Icon -->
+                <span class="text-gray-400" [innerHTML]="sanitizeHtml(group.icon)"></span>
+                <!-- Category Name -->
+                <span class="text-sm font-medium mr-auto text-gray-800">{{ group.name }}</span>
+               </div>
+              </summary>
+              <!-- Subcategories -->
+              <div class="collapse-content px-4 pb-2">
+                <ul class="flex flex-col h-full max-h-[200px] overflow-auto snap-y snap-mandatory">
+                  @for (subcategory of group.subcategories; track subcategory.id) {
+                    @if (getRecipeCount(subcategory) > 0) {
+                      <li class="inline-flex whitespace-normal text-sm ml-10 border-t first:border-t-0 snap-start">
+                        <button
+                          type="button"
+                          (click)="navigateToFilter(subcategory)"
+                          class="btn btn-lg btn-ghost justify-start text-sm font-semibold rounded-none w-full">
+                          {{ subcategory.name }}
+                          @if (getRecipeCount(subcategory); as count) {
+                            <span class="text-xs text-gray-400 ml-auto">({{ count }})</span>
+                          }
+                        </button>
+                      </li>
+                    }
+                  }
+                </ul>
+              </div>
+            </details>
           }
         </div>
       </div>
 
-      <!-- Hierarchical Categories Section -->
-      <div class="flex flex-col">
-        <div class="sticky top-[var(--header-height)] z-10 px-6 py-3 bg-white">
-          <h3 class="text-sm text-gray-800 font-semibold">Categories</h3>
-        </div>
-        <!-- Category Groups -->
-        @for (group of categoryGroups; track group.id) {
-          <details class="accordion group border-y-2 border-transparent open:border-[var(--color-border)] open:[--height:200px]">
-            <summary
-              class="button button-lg justify-start gap-3 w-full text-gray-400">
-              <!-- Icon -->
-              <span class="text-gray-400" [innerHTML]="sanitizeHtml(group.icon)"></span>
-              <!-- Category Name -->
-              <span class="text-sm font-medium mr-auto text-gray-800">{{ group.name }}</span>
-              <!-- Chevron -->
-              <svg stroke="currentColor" fill="none" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" focusable="false" class="inline-block size-5 min-h-[1lh] shrink-0 align-middle text-current leading-[1em] transition-[rotate] duration-300 group-open:rotate-180" height="200px" width="200px" xmlns="http://www.w3.org/2000/svg"><path d="m6 9 6 6 6-6"></path></svg>
-            </summary>
-            <!-- Subcategories -->
-            <div class="px-4 pb-2">
-              <ul class="flex flex-col h-full max-h-[200px] overflow-auto snap-y snap-mandatory">
-                @for (subcategory of group.subcategories; track subcategory.id) {
-                  @if (getRecipeCount(subcategory) > 0) {
-                    <li class="inline-flex whitespace-normal text-sm ml-10 border-t first:border-t-0 snap-start">
-                      <button
-                        (click)="navigateToFilter(subcategory)"
-                        class="button button-lg button-ghost justify-start text-sm font-semibold rounded-none w-full">
-                        {{ subcategory.name }}
-                        @if (getRecipeCount(subcategory); as count) {
-                          <span class="text-xs text-gray-400 ml-auto">({{ count }})</span>
-                        }
-                      </button>
-                    </li>
-                  }
-                }
-              </ul>
-            </div>
-          </details>
-        }
-      </div>
-
-      <!-- Quick Filters -->
-      <div class="px-6 py-4 border-t">
-        <h3 class="text-sm text-gray-800 font-semibold mb-3">Quick Filters</h3>
-        <div class="flex flex-wrap gap-2 text-gray-800">
-          <button (click)="navigateToFilter({ filterKey: 'tags', filterValue: 'trending' })" class="button button-sm button-outline font-semibold rounded-full">
-            🔥 Trending
-          </button>
-          <button (click)="navigateToFilter({ filterKey: 'tags', filterValue: 'popular' })" class="button button-sm button-outline font-semibold rounded-full">
-            ⭐ Popular
-          </button>
-          <button (click)="navigateToFilter({ filterKey: 'tags', filterValue: 'quick-easy' })" class="button button-sm button-outline font-semibold rounded-full">
-            ⚡ Quick & Easy
-          </button>
-          <button (click)="navigateToFilter({ filterKey: 'tags', filterValue: 'healthy' })" class="button button-sm button-outline font-semibold rounded-full">
-            🌱 Healthy
-          </button>
-          <button (click)="navigateToFilter({ filterKey: 'tags', filterValue: 'spicy' })" class="button button-sm button-outline font-semibold rounded-full">
-            🌶️ Spicy
-          </button>
-        </div>
-      </div>
     </div>
   `,
 })
