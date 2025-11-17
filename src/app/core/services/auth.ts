@@ -19,6 +19,11 @@ export interface User {
   id: string;
   email: string;
   password: string;
+  name?: string;
+  dateOfBirth?: string;
+  phone?: string;
+  gender?: string;
+  bookmarks?: string[]; // Array of recipe IDs
   createdAt?: number;
   updatedAt?: number;
 }
