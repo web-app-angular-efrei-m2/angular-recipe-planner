@@ -47,6 +47,21 @@ export class UserService {
   }
 
   /**
+   * Update user profile
+   * @param userId - The ID of the user to update
+   * @param userData - Partial user data to update
+   * @returns Observable<User> - The updated user data
+   */
+  updateUser(userId: string, userData: Partial<User>): Observable<User> {
+    return this.http
+      .patch<User>(`${this.API_URL}/users/${userId}`, {
+        ...userData,
+        updatedAt: Date.now(),
+      })
+      .pipe(catchError(this.handleError));
+  }
+
+  /**
    * Handles HTTP errors
    * @param error - The HTTP error response
    * @returns An observable with the error

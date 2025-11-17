@@ -16,6 +16,7 @@ export interface Recipe {
   servings: number;
   category: string;
   imageUrl?: string;
+  gallery?: string[]; // Array of image URLs for recipe gallery
 
   // Enhanced filter properties
   cuisine?: string; // e.g., "Italian", "Asian", "Mexican"
