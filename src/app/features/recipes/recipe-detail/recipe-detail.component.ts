@@ -19,7 +19,7 @@ import { cn } from "@/utils/classes";
     <div class="flex flex-1 flex-col h-dvh wrap-break-word rounded-sm text-start font-semibold text-gray-400 transition-colors duration-300" [style.background-color]="'rgb(243 232 255)'">
       <!-- background image overlay -->
       <div
-        class="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-500 opacity-20 blur-sm"
+        class="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-500"
         [style.background-image]="recipe()?.gallery?.[selectedImageIndex()] ? 'url(' + recipe()!.gallery![selectedImageIndex()] + ')' : 'none'"
       ></div>
       <!-- content wrapper with relative positioning -->
